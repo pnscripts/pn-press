@@ -65,6 +65,12 @@ Filament login stays at `/admin`. Only users with the `admin` or `editor` role c
 php artisan test
 ```
 
+## More from PN Scripts
+
+- [PN Invoice](https://github.com/pnscripts/pn-invoice): free PHP library to write and validate EN 16931 e-invoices (UBL and CII).
+- [Laravel and Filament upgrades and care](https://pnscripts.com/services/laravel-filament-care): fixed-price upgrades to Laravel 13 and Filament 5, and monthly care plans.
+- All products: [pnscripts.com/products](https://pnscripts.com/products)
+
 ## License
 
 MIT. Copyright 2026 Petar Nikolov / PN Scripts. See [LICENSE](LICENSE).
