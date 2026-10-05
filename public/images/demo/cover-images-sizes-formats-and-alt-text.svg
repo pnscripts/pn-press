@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630" role="img" aria-hidden="true">
+  <defs>
+    <linearGradient id="bg" gradientTransform="rotate(62 .5 .5)">
+      <stop offset="0" stop-color="#0f2147"/>
+      <stop offset="1" stop-color="#142a57"/>
+    </linearGradient>
+    <radialGradient id="glow" cx=".40" cy=".42" r=".6">
+      <stop offset="0" stop-color="#f67a3c" stop-opacity=".35"/>
+      <stop offset="1" stop-color="#f67a3c" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.4" fill="#bcd3ff" fill-opacity=".12"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+  <rect width="1200" height="630" fill="url(#dots)"/>
+  <rect x="252" y="230" width="48" height="270" rx="24" fill="#bcd3ff" fill-opacity=".44"/>
+  <rect x="324" y="153" width="48" height="347" rx="24" fill="#4f90ff" fill-opacity=".52"/>
+  <rect x="396" y="227" width="48" height="273" rx="24" fill="#bcd3ff" fill-opacity=".64"/>
+  <rect x="468" y="356" width="48" height="144" rx="24" fill="#f67a3c" fill-opacity=".95"/>
+  <rect x="540" y="126" width="48" height="374" rx="24" fill="#4f90ff" fill-opacity=".70"/>
+  <rect x="612" y="355" width="48" height="145" rx="24" fill="#bcd3ff" fill-opacity=".60"/>
+  <rect x="684" y="123" width="48" height="377" rx="24" fill="#4f90ff" fill-opacity=".54"/>
+  <rect x="756" y="102" width="48" height="398" rx="24" fill="#bcd3ff" fill-opacity=".49"/>
+  <rect x="828" y="157" width="48" height="343" rx="24" fill="#4f90ff" fill-opacity=".64"/>
+  <rect x="900" y="327" width="48" height="173" rx="24" fill="#4f90ff" fill-opacity=".40"/>
+  <rect x="200" y="520" width="800" height="4" rx="2" fill="#bcd3ff" fill-opacity=".35"/>
+
+</svg>

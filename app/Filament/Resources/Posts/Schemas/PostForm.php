@@ -48,7 +48,7 @@ class PostForm
                 TextInput::make('featured_image')
                     ->label('Featured image')
                     ->maxLength(255)
-                    ->helperText('A full URL or a path on the public disk.'),
+                    ->helperText('A full URL, a path on the public disk, or a path inside public/ starting with / (for example /images/demo/cover.svg).'),
                 Textarea::make('excerpt')
                     ->required()
                     ->rows(3)

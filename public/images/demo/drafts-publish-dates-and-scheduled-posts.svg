@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630" role="img" aria-hidden="true">
+  <defs>
+    <linearGradient id="bg" gradientTransform="rotate(67 .5 .5)">
+      <stop offset="0" stop-color="#0f2147"/>
+      <stop offset="1" stop-color="#142a57"/>
+    </linearGradient>
+    <radialGradient id="glow" cx=".39" cy=".38" r=".6">
+      <stop offset="0" stop-color="#4f90ff" stop-opacity=".35"/>
+      <stop offset="1" stop-color="#4f90ff" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.4" fill="#bcd3ff" fill-opacity=".12"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+  <rect width="1200" height="630" fill="url(#dots)"/>
+  <rect x="312" y="104" width="64" height="64" rx="14" fill="none" stroke="#bcd3ff" stroke-width="2" stroke-opacity=".17"/>
+  <rect x="394" y="104" width="64" height="64" rx="14" fill="none" stroke="#bcd3ff" stroke-width="2" stroke-opacity=".18"/>
+  <rect x="722" y="104" width="64" height="64" rx="14" fill="none" stroke="#bcd3ff" stroke-width="2" stroke-opacity=".26"/>
+  <rect x="804" y="104" width="64" height="64" rx="14" fill="none" stroke="#bcd3ff" stroke-width="2" stroke-opacity=".28"/>
+  <rect x="312" y="186" width="64" height="64" rx="14" fill="none" stroke="#bcd3ff" stroke-width="2" stroke-opacity=".24"/>
+  <rect x="394" y="186" width="64" height="64" rx="14" fill="none" stroke="#bcd3ff" stroke-width="2" stroke-opacity=".34"/>
+  <rect x="558" y="186" width="64" height="64" rx="14" fill="none" stroke="#bcd3ff" stroke-width="2" stroke-opacity=".14"/>
+  <rect x="640" y="186" width="64" height="64" rx="14" fill="none" stroke="#bcd3ff" stroke-width="2" stroke-opacity=".24"/>
+  <rect x="722" y="186" width="64" height="64" rx="14" fill="#f67a3c"/>
+  <rect x="804" y="186" width="64" height="64" rx="14" fill="none" stroke="#bcd3ff" stroke-width="2" stroke-opacity=".20"/>
+  <rect x="476" y="268" width="64" height="64" rx="14" fill="none" stroke="#bcd3ff" stroke-width="2" stroke-opacity=".20"/>
+  <rect x="558" y="268" width="64" height="64" rx="14" fill="none" stroke="#bcd3ff" stroke-width="2" stroke-opacity=".23"/>
+  <rect x="640" y="268" width="64" height="64" rx="14" fill="none" stroke="#bcd3ff" stroke-width="2" stroke-opacity=".32"/>
+  <rect x="722" y="268" width="64" height="64" rx="14" fill="none" stroke="#bcd3ff" stroke-width="2" stroke-opacity=".35"/>
+  <rect x="804" y="268" width="64" height="64" rx="14" fill="none" stroke="#bcd3ff" stroke-width="2" stroke-opacity=".24"/>
+  <rect x="394" y="350" width="64" height="64" rx="14" fill="none" stroke="#bcd3ff" stroke-width="2" stroke-opacity=".35"/>
+  <rect x="640" y="350" width="64" height="64" rx="14" fill="none" stroke="#bcd3ff" stroke-width="2" stroke-opacity=".23"/>
+  <rect x="722" y="350" width="64" height="64" rx="14" fill="none" stroke="#bcd3ff" stroke-width="2" stroke-opacity=".18"/>
+  <rect x="804" y="350" width="64" height="64" rx="14" fill="none" stroke="#bcd3ff" stroke-width="2" stroke-opacity=".26"/>
+  <rect x="394" y="432" width="64" height="64" rx="14" fill="none" stroke="#bcd3ff" stroke-width="2" stroke-opacity=".25"/>
+  <rect x="476" y="432" width="64" height="64" rx="14" fill="none" stroke="#bcd3ff" stroke-width="2" stroke-opacity=".19"/>
+  <rect x="640" y="432" width="64" height="64" rx="14" fill="none" stroke="#bcd3ff" stroke-width="2" stroke-opacity=".19"/>
+  <rect x="722" y="432" width="64" height="64" rx="14" fill="none" stroke="#bcd3ff" stroke-width="2" stroke-opacity=".32"/>
+  <rect x="804" y="432" width="64" height="64" rx="14" fill="none" stroke="#bcd3ff" stroke-width="2" stroke-opacity=".28"/>
+
+</svg>

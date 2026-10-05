@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630" role="img" aria-hidden="true">
+  <defs>
+    <linearGradient id="bg" gradientTransform="rotate(64 .5 .5)">
+      <stop offset="0" stop-color="#0a1630"/>
+      <stop offset="1" stop-color="#142a57"/>
+    </linearGradient>
+    <radialGradient id="glow" cx=".53" cy=".70" r=".6">
+      <stop offset="0" stop-color="#f67a3c" stop-opacity=".35"/>
+      <stop offset="1" stop-color="#f67a3c" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.4" fill="#bcd3ff" fill-opacity=".12"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+  <rect width="1200" height="630" fill="url(#dots)"/>
+  <circle cx="616" cy="289" r="50" fill="none" stroke="#bcd3ff" stroke-width="2" stroke-opacity=".24"/>
+  <circle cx="616" cy="289" r="105" fill="none" stroke="#bcd3ff" stroke-width="2" stroke-opacity=".34"/>
+  <circle cx="616" cy="289" r="152" fill="none" stroke="#f67a3c" stroke-width="6" stroke-opacity=".9"/>
+  <circle cx="616" cy="289" r="185" fill="none" stroke="#bcd3ff" stroke-width="2" stroke-opacity=".25"/>
+  <circle cx="616" cy="289" r="246" fill="none" stroke="#bcd3ff" stroke-width="2" stroke-opacity=".32"/>
+  <circle cx="616" cy="289" r="310" fill="none" stroke="#bcd3ff" stroke-width="2" stroke-opacity=".25"/>
+  <circle cx="725.1" cy="172" r="14" fill="#f67a3c"/>
+  <circle cx="621.4" cy="-21" r="12" fill="#f67a3c"/>
+  <circle cx="727.1" cy="173.9" r="10" fill="#4f90ff"/>
+  <circle cx="692" cy="537.6" r="16" fill="#f67a3c"/>
+  <circle cx="601.4" cy="498.5" r="9" fill="#f67a3c"/>
+  <rect x="80" y="503" width="165" height="8" rx="4" fill="#f67a3c"/>
+
+</svg>

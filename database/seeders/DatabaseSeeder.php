@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\PostStatus;
 use App\Models\Category;
 use App\Models\Post;
 use App\Models\User;
@@ -9,6 +10,12 @@ use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 
+/**
+ * Demo seed: roles, a local admin account and the original demo posts in DemoContent.
+ *
+ * Safe to run more than once: rows are matched by email or slug and existing
+ * rows are left untouched, so edits made in the admin survive a re-seed.
+ */
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
@@ -28,41 +35,43 @@ class DatabaseSeeder extends Seeder
 
         $admin->assignRole($adminRole);
 
-        $categories = collect([
-            ['name' => 'Laravel', 'slug' => 'laravel', 'description' => 'Framework tips, routing, Eloquent, and shipping Laravel apps.'],
-            ['name' => 'Filament', 'slug' => 'filament', 'description' => 'Admin panels, resources, and the Filament ecosystem.'],
-            ['name' => 'Guides', 'slug' => 'guides', 'description' => 'Practical walkthroughs for getting this starter into production.'],
-        ])->map(fn (array $attributes) => Category::query()->firstOrCreate(
-            ['slug' => $attributes['slug']],
-            $attributes
-        ));
-
-        $publishedTitles = [
-            'Getting started with this blog CMS',
-            'Draft vs published: how visibility works',
-            'Organizing posts with categories',
-            'Using Filament to manage content',
-            'Roles for admin and editor access',
-            'Where to go after you clone this kit',
-        ];
-
-        foreach ($publishedTitles as $index => $title) {
-            Post::factory()->published()->create([
-                'user_id' => $admin->id,
-                'category_id' => $categories[$index % $categories->count()]->id,
-                'title' => $title,
-                'slug' => str()->slug($title),
-                'excerpt' => 'A sample published article that ships with the demo seed so you can browse the public blog immediately.',
-                'featured_image' => 'https://picsum.photos/seed/'.str()->slug($title).'/1200/630',
+        $categories = collect(DemoContent::categories())
+            ->mapWithKeys(fn (array $attributes) => [
+                $attributes['slug'] => Category::query()->firstOrCreate(
+                    ['slug' => $attributes['slug']],
+                    $attributes
+                ),
             ]);
-        }
 
-        Post::factory()->draft()->create([
-            'user_id' => $admin->id,
-            'category_id' => $categories->first()->id,
-            'title' => 'Unpublished notes (draft)',
-            'slug' => 'unpublished-notes-draft',
-            'excerpt' => 'This draft is seeded on purpose. It should never appear on the public blog.',
-        ]);
+        $today = now()->startOfDay();
+
+        foreach (DemoContent::posts() as $index => $post) {
+            $publishedAt = $post['status'] === PostStatus::Published && $post['days_ago'] !== null
+                ? $today->copy()->subDays($post['days_ago'])->setTime(9, 0)->addMinutes(($index * 17) % 60)
+                : null;
+
+            $record = Post::query()->firstOrCreate(
+                ['slug' => $post['slug']],
+                [
+                    'user_id' => $admin->id,
+                    'category_id' => $categories[$post['category']]->id,
+                    'title' => $post['title'],
+                    'excerpt' => $post['excerpt'],
+                    'body' => $post['body'],
+                    'status' => $post['status'],
+                    'published_at' => $publishedAt,
+                    'featured_image' => DemoCoverGenerator::publicPath($post['slug']),
+                ]
+            );
+
+            if ($record->wasRecentlyCreated) {
+                // Give new demo rows believable history instead of "created a second ago".
+                $writtenAt = $publishedAt !== null && $publishedAt->isPast()
+                    ? $publishedAt->copy()->subHours(2)
+                    : $today->copy()->subDays(2 - ($index % 2))->setTime(15, 0);
+
+                $record->forceFill(['created_at' => $writtenAt, 'updated_at' => $writtenAt])->saveQuietly();
+            }
+        }
     }
 }

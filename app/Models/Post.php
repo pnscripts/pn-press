@@ -74,6 +74,18 @@ class Post extends Model
             return $this->featured_image;
         }
 
+        // A leading slash means a file inside public/ (the demo covers live in public/images/demo).
+        if (str_starts_with($this->featured_image, '/')) {
+            return asset(ltrim($this->featured_image, '/'));
+        }
+
         return asset('storage/'.$this->featured_image);
+    }
+
+    public function readingTimeMinutes(): int
+    {
+        $words = str_word_count(strip_tags((string) $this->body));
+
+        return max(1, (int) ceil($words / 200));
     }
 }
