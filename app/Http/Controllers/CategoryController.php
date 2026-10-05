@@ -18,6 +18,8 @@ class CategoryController extends Controller
             ->latest('published_at')
             ->paginate(10);
 
-        return view('categories.show', compact('category', 'posts'));
+        $categories = PostController::categoriesWithPosts();
+
+        return view('categories.show', compact('category', 'posts', 'categories'));
     }
 }

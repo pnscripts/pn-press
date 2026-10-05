@@ -45,10 +45,12 @@ Filament login stays at `/admin`. Only users with the `admin` or `editor` role c
 
 - Public blog index (`/`), post pages (`/blog/{slug}`), and category archives (`/category/{slug}`)
 - Draft vs published visibility (drafts never appear on the public site)
+- A clean, responsive public theme (Tailwind CSS 4) with category navigation, reading time and related posts
 - Filament 5 resources for posts and categories (title, auto slug, excerpt, rich body, status, publish date, featured image URL/path)
+- Admin dashboard: posts by status (published, drafts, scheduled), latest posts, drafts waiting to be published, published posts by category
 - Spatie roles: `admin` and `editor`
-- Demo seed: 3 categories, 6 published posts, 1 draft
-- PHPUnit coverage for public listing/show/archive and admin access
+- Demo seed: 4 categories and 10 original posts about running a blog (8 published, 1 scheduled, 1 draft), with abstract cover images drawn by `php artisan pn-press:demo-covers` into `public/images/demo` (no stock photos, no hotlinks). Re-running the seeder never duplicates or overwrites posts.
+- PHPUnit coverage for the public blog, admin access, dashboard widgets and the demo seed
 - Laravel Telescope (disabled by default; `require-dev` only) and Scramble for API docs if you add APIs later
 
 ## What is not included
