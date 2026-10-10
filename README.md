@@ -75,4 +75,4 @@ php artisan test
 
 ## License
 
-MIT. Copyright 2026 Petar Nikolov / PN Scripts. See [LICENSE](LICENSE).
+MIT. Copyright 2026 ПН СКРИПТС ЕООД (PN Scripts). See [LICENSE](LICENSE).
