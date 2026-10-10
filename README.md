@@ -1,6 +1,6 @@
-# PN Press
+# PN Scripts Press
 
-PN Press is a [PN Scripts](https://pnscripts.com) product ([product page](https://pnscripts.com/products/pn-press)). It was previously published as Laravel Blog CMS.
+PN Scripts Press is a [PN Scripts](https://pnscripts.com) product ([product page](https://pnscripts.com/products/pn-press)). It was previously published as Laravel Blog CMS.
 
 A small, working blog CMS starter kit: a public blog on the front, [Filament](https://filamentphp.com) at `/admin` for posts and categories.
 
@@ -69,7 +69,7 @@ php artisan test
 
 ## More from PN Scripts
 
-- [PN Invoice](https://github.com/pnscripts/pn-invoice): free PHP library to write and validate EN 16931 e-invoices (UBL and CII).
+- [PN Scripts Invoice](https://github.com/pnscripts/pn-invoice): free PHP library to write and validate EN 16931 e-invoices (UBL and CII).
 - [Laravel and Filament upgrades and care](https://pnscripts.com/services/laravel-filament-care): fixed-price upgrades to Laravel 13 and Filament 5, and monthly care plans.
 - All products: [pnscripts.com/products](https://pnscripts.com/products)
 
