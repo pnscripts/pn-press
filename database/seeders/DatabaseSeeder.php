@@ -7,11 +7,12 @@ use App\Models\Category;
 use App\Models\Post;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use App\Press\Permissions;
 use Spatie\Permission\Models\Role;
-use Spatie\Permission\PermissionRegistrar;
 
 /**
- * Demo seed: roles, a local admin account and the original demo posts in DemoContent.
+ * Demo seed: roles, a local admin account, the original demo posts in DemoContent and the
+ * CMS demo (pages, menus, theme, example plugins) in DemoSite.
  *
  * Safe to run more than once: rows are matched by email or slug and existing
  * rows are left untouched, so edits made in the admin survive a re-seed.
@@ -20,10 +21,8 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        app()[PermissionRegistrar::class]->forgetCachedPermissions();
-
-        $adminRole = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
-        Role::firstOrCreate(['name' => 'editor', 'guard_name' => 'web']);
+        Permissions::sync();
+        $adminRole = Role::findByName('admin', 'web');
 
         $admin = User::query()->firstOrCreate(
             ['email' => 'admin@example.com'],
@@ -73,5 +72,7 @@ class DatabaseSeeder extends Seeder
                 $record->forceFill(['created_at' => $writtenAt, 'updated_at' => $writtenAt])->saveQuietly();
             }
         }
+
+        $this->call(DemoSite::class);
     }
 }

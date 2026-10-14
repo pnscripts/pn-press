@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use App\Enums\PostStatus;
 
 /**
- * Original demo content for a fresh PN Press install.
+ * Original demo content for a fresh PN Scripts Press install.
  *
  * Every post is about running a small blog, so the demo doubles as a short
  * manual. Covers are drawn by DemoCoverGenerator and served from public/.
@@ -18,7 +18,7 @@ final class DemoContent
     public static function categories(): array
     {
         return [
-            ['name' => 'Getting started', 'slug' => 'getting-started', 'description' => 'First steps after installing PN Press: what to change, what to keep and where things live.'],
+            ['name' => 'Getting started', 'slug' => 'getting-started', 'description' => 'First steps after installing PN Scripts Press: what to change, what to keep and where things live.'],
             ['name' => 'Writing', 'slug' => 'writing', 'description' => 'Titles, excerpts, structure and the small habits that make posts easier to read.'],
             ['name' => 'Workflow', 'slug' => 'workflow', 'description' => 'Drafts, scheduling, roles and the routines that keep a blog moving.'],
             ['name' => 'Design', 'slug' => 'design', 'description' => 'Cover images, categories and the parts of the site readers see first.'],
@@ -35,7 +35,7 @@ final class DemoContent
     {
         return [
             [
-                'title' => 'Welcome to your new PN Press blog',
+                'title' => 'Welcome to your new PN Scripts Press blog',
                 'slug' => 'welcome-to-your-new-pn-press-blog',
                 'category' => 'getting-started',
                 'status' => PostStatus::Published,
@@ -84,13 +84,13 @@ HTML,
                 'status' => PostStatus::Published,
                 'days_ago' => 6,
                 'cover' => 'grid',
-                'excerpt' => 'How PN Press decides what readers can see, and how to use a future publish date to line up posts ahead of time.',
+                'excerpt' => 'How PN Scripts Press decides what readers can see, and how to use a future publish date to line up posts ahead of time.',
                 'body' => <<<'HTML'
 <p>A post appears on the public site only when two things are true: its status is <em>Published</em>, and its publish date is now or in the past.</p>
 <h2>Drafts</h2>
 <p>Drafts are private. They do not show up on the home page, in category archives or at their own URL. Use them for ideas, half-written posts and anything waiting for a second pair of eyes.</p>
 <h2>Publish dates</h2>
-<p>If you publish without picking a date, PN Press uses the current time. You can also set the date yourself, for example to keep the original date of a post you are moving from another blog.</p>
+<p>If you publish without picking a date, PN Scripts Press uses the current time. You can also set the date yourself, for example to keep the original date of a post you are moving from another blog.</p>
 <h2>Scheduling</h2>
 <p>Set the status to <em>Published</em> and choose a date in the future. The post stays hidden until that moment and then appears on its own. There is no cron job to set up; the check happens every time a page loads.</p>
 <p>The dashboard lists scheduled posts separately, so you can see at a glance what is lined up for the coming days.</p>
@@ -154,9 +154,9 @@ HTML,
                 'status' => PostStatus::Published,
                 'days_ago' => 17,
                 'cover' => 'grid',
-                'excerpt' => 'PN Press ships with two roles, admin and editor. What each one is for, and a safe way to add a guest writer.',
+                'excerpt' => 'PN Scripts Press ships with two roles, admin and editor. What each one is for, and a safe way to add a guest writer.',
                 'body' => <<<'HTML'
-<p>PN Press comes with two roles. Only users with one of them can sign in to the admin panel at all; everyone else is turned away at the door.</p>
+<p>PN Scripts Press comes with two roles. Only users with one of them can sign in to the admin panel at all; everyone else is turned away at the door.</p>
 <h2>Admin</h2>
 <p>Admins run the site. Give this role to the people who own it and nobody else.</p>
 <h2>Editor</h2>

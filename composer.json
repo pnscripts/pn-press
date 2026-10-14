@@ -2,8 +2,8 @@
     "$schema": "https://getcomposer.org/schema.json",
     "name": "pnscripts/pn-press",
     "type": "project",
-    "description": "A Laravel 13 + Filament 5 blog CMS starter kit with a public blog, admin panel, roles, and demo seed.",
-    "keywords": ["laravel", "filament", "blog", "cms", "starter-kit"],
+    "description": "PN Scripts Press: a Laravel 13 + Filament 5 CMS with block pages, menus, media, SEO, revisions, and WordPress-style plugins and themes.",
+    "keywords": ["laravel", "filament", "blog", "cms", "plugins", "themes"],
     "license": "MIT",
     "authors": [
         {
@@ -37,7 +37,10 @@
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
-        }
+        },
+        "files": [
+            "app/Press/helpers.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {

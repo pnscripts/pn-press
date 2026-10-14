@@ -108,7 +108,7 @@ class DemoSeederTest extends TestCase
     {
         $this->seed(DatabaseSeeder::class);
 
-        $response = $this->get('/')->assertOk();
+        $response = $this->get('/blog')->assertOk();
 
         foreach (DemoContent::posts() as $post) {
             $visible = $post['status'] === PostStatus::Published && $post['days_ago'] >= 0;
