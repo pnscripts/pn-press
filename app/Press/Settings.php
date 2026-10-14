@@ -93,8 +93,11 @@ class Settings
     /** The product name a fresh install shows until Settings › Site name is filled in. */
     public const DEFAULT_SITE_NAME = 'PN Scripts Press';
 
+    /** APP_NAME values that are only defaults (Laravel's and this kit's earlier names), not a real site name. */
+    public const STOCK_APP_NAMES = ['Laravel', 'Laravel Blog CMS', 'PN Press'];
+
     /**
-     * Settings › Site name, else APP_NAME, else "PN Scripts Press". Laravel's stock "Laravel" counts as unset.
+     * Settings › Site name, else APP_NAME, else "PN Scripts Press". Stock APP_NAMEs count as unset.
      */
     public function siteName(): string
     {
@@ -106,7 +109,7 @@ class Settings
 
         $appName = trim((string) config('app.name'));
 
-        return $appName !== '' && $appName !== 'Laravel' ? $appName : self::DEFAULT_SITE_NAME;
+        return $appName !== '' && ! in_array($appName, self::STOCK_APP_NAMES, true) ? $appName : self::DEFAULT_SITE_NAME;
     }
 
     public function flush(): void

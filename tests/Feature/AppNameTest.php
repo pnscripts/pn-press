@@ -57,7 +57,7 @@ class AppNameTest extends TestCase
 
     public function test_a_fresh_install_is_called_pn_scripts_press_even_with_laravels_stock_name(): void
     {
-        foreach (['Laravel', '', null] as $stock) {
+        foreach (['Laravel', 'Laravel Blog CMS', 'PN Press', '', null] as $stock) {
             config(['app.name' => $stock]);
             app(Settings::class)->flush();
 
