@@ -8,6 +8,7 @@ use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
@@ -56,6 +57,13 @@ class PostForm
                 RichEditor::make('body')
                     ->required()
                     ->columnSpanFull(),
+                Section::make('SEO')
+                    ->collapsed()
+                    ->columnSpanFull()
+                    ->schema([
+                        TextInput::make('meta_title')->maxLength(70)->helperText('Defaults to the title.'),
+                        Textarea::make('meta_description')->rows(2)->maxLength(160)->helperText('Defaults to the excerpt.'),
+                    ]),
             ]);
     }
 }

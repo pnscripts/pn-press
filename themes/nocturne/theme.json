@@ -1,0 +1,16 @@
+{
+    "slug": "nocturne",
+    "name": "Nocturne",
+    "version": "1.0.0",
+    "description": "A dark theme for late readers: deep ink background, violet accent and a centred masthead.",
+    "author": "PN Scripts",
+    "requires": { "press": ">=1.0" },
+    "screenshot": "screenshot.svg",
+    "stylesheet": "assets/theme.css",
+    "settings": [
+        { "key": "accent", "label": "Accent colour", "type": "color", "default": "#b69cff" },
+        { "key": "highlight", "label": "Highlight colour", "type": "color", "default": "#ffcf5a" },
+        { "key": "display_font", "label": "Headings", "type": "select", "default": "sans", "options": { "serif": "Serif (Fraunces)", "sans": "Sans (Inter)" } },
+        { "key": "show_tagline", "label": "Show the tagline under the site name", "type": "toggle", "default": true }
+    ]
+}

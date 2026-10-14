@@ -1,0 +1,19 @@
+{
+    "slug": "folio",
+    "name": "Folio",
+    "version": "1.0.0",
+    "description": "The PN Scripts Press house style: warm paper, ink type, a teal accent and a serif display face.",
+    "author": "PN Scripts",
+    "requires": { "press": ">=1.0" },
+    "screenshot": "screenshot.svg",
+    "stylesheet": "assets/theme.css",
+    "templates": {
+        "narrow": "Narrow column (long reads)"
+    },
+    "settings": [
+        { "key": "accent", "label": "Accent colour", "type": "color", "default": "#0f6e66" },
+        { "key": "highlight", "label": "Highlight colour", "type": "color", "default": "#f2c14e" },
+        { "key": "paper", "label": "Background", "type": "color", "default": "#f6f3ec" },
+        { "key": "display_font", "label": "Headings", "type": "select", "default": "serif", "options": { "serif": "Serif (Fraunces)", "sans": "Sans (Inter)" } }
+    ]
+}

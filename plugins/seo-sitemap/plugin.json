@@ -1,0 +1,18 @@
+{
+    "slug": "seo-sitemap",
+    "name": "SEO Sitemap",
+    "version": "1.1.0",
+    "description": "Publishes /sitemap.xml with every public page, post and category, and links it from the page head.",
+    "author": "PN Scripts",
+    "requires": {
+        "press": ">=1.0"
+    },
+    "provider": "PnPress\\SeoSitemap\\SeoSitemapServiceProvider",
+    "autoload": {
+        "psr-4": {
+            "PnPress\\SeoSitemap\\": "src/"
+        }
+    },
+    "views": "resources/views",
+    "routes": "routes/web.php"
+}

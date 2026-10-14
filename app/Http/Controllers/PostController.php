@@ -14,7 +14,8 @@ class PostController extends Controller
             ->published()
             ->with('category')
             ->latest('published_at')
-            ->paginate(10);
+            ->paginate((int) press_setting('reading.posts_per_page', 10))
+            ->withPath(route('blog'));
 
         $categories = self::categoriesWithPosts();
 
