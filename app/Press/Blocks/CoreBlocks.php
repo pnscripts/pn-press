@@ -2,7 +2,7 @@
 
 namespace App\Press\Blocks;
 
-use App\Models\Media;
+use App\Filament\Forms\MediaPicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
@@ -66,12 +66,9 @@ class CoreBlocks
         ], 'press.blocks.latest-posts', 'heroicon-o-newspaper'));
     }
 
+    /** Image picker with thumbnails (see MediaPicker). Plugins can use it in their own blocks. */
     public static function mediaSelect(string $name = 'media_id'): Select
     {
-        return Select::make($name)
-            ->label('Image')
-            ->options(fn () => Media::query()->where('mime_type', 'like', 'image/%')->latest()->limit(500)->pluck('name', 'id'))
-            ->searchable()
-            ->helperText('Upload images in Content → Media.');
+        return MediaPicker::make($name);
     }
 }

@@ -19,6 +19,30 @@ class Media extends Model
         });
     }
 
+    /** Create the record for a file already stored on the disk (an upload). */
+    public static function fromUpload(string $disk, string $path, ?int $userId = null, array $attributes = []): self
+    {
+        $storage = Storage::disk($disk);
+        $mime = $storage->mimeType($path) ?: null;
+        $data = $attributes + [
+            'disk' => $disk,
+            'path' => $path,
+            'user_id' => $userId,
+            'name' => basename($path),
+            'mime_type' => $mime,
+            'size' => $storage->size($path),
+        ];
+
+        if (str_starts_with((string) $mime, 'image/') && $mime !== 'image/svg+xml') {
+            $info = @getimagesize($storage->path($path));
+            if ($info) {
+                [$data['width'], $data['height']] = $info;
+            }
+        }
+
+        return static::query()->create($data);
+    }
+
     public function uploader(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
