@@ -2,7 +2,7 @@
 
 All notable changes to PN Scripts Press. Dates are in YYYY-MM-DD.
 
-## Unreleased (1.0.0)
+## 1.0.0 (2026-10-14)
 
 PN Scripts Press grows from a blog starter into a small CMS with WordPress-style plugins and themes, and its own design.
 
