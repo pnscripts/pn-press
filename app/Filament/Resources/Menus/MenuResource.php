@@ -7,6 +7,7 @@ use App\Filament\Resources\Menus\Pages\EditMenu;
 use App\Filament\Resources\Menus\Pages\ListMenus;
 use App\Models\Menu;
 use App\Models\MenuItem;
+use App\Press\Menus;
 use App\Press\Permissions;
 use BackedEnum;
 use Filament\Actions\DeleteAction;
@@ -56,29 +57,37 @@ class MenuResource extends Resource
                     ->unique(ignoreRecord: true)
                     ->helperText('Where the theme shows this menu.'),
             ]),
-            Repeater::make('items')
-                ->relationship()
-                ->orderColumn('sort_order')
-                ->reorderableWithDragAndDrop()
-                ->collapsible()
-                ->itemLabel(fn (array $state) => $state['label'] ?? null)
+            self::itemsRepeater('items', 1)
+                ->label('Items')
                 ->columnSpanFull()
-                ->schema([
-                    ...self::itemFields(),
-                    Repeater::make('children')
-                        ->label('Dropdown items')
-                        ->relationship()
-                        ->orderColumn('sort_order')
-                        ->collapsible()
-                        ->collapsed()
-                        ->itemLabel(fn (array $state) => $state['label'] ?? null)
-                        ->schema(self::itemFields())
-                        ->defaultItems(0)
-                        ->columnSpanFull(),
-                ])
-                ->defaultItems(0)
                 ->addActionLabel('Add menu item'),
         ]);
+    }
+
+    /**
+     * Menu items, with "Dropdown items" nested inside them down to press.menus.max_depth levels.
+     * Drag the handle to reorder items within a level.
+     */
+    private static function itemsRepeater(string $name, int $level): Repeater
+    {
+        $schema = self::itemFields();
+
+        if ($level < Menus::maxDepth()) {
+            $schema[] = self::itemsRepeater('children', $level + 1)
+                ->label($level === 1 ? 'Dropdown items' : 'Sub-items (level '.($level + 1).')')
+                ->collapsed()
+                ->columnSpanFull()
+                ->addActionLabel($level === 1 ? 'Add dropdown item' : 'Add sub-item');
+        }
+
+        return Repeater::make($name)
+            ->relationship()
+            ->orderColumn('sort_order')
+            ->reorderableWithDragAndDrop()
+            ->collapsible()
+            ->itemLabel(fn (array $state) => $state['label'] ?? null)
+            ->schema($schema)
+            ->defaultItems(0);
     }
 
     /** @return array<int, mixed> */

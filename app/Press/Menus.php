@@ -19,7 +19,9 @@ class Menus
     public function __construct(private readonly Hooks $hooks) {}
 
     /**
-     * @return list<array{label: string, url: string, new_tab: bool, active: bool, children: list<array<string, mixed>>}>
+     * Nested up to maxDepth() levels; an item is "active" when it or one of its children is the current page.
+     *
+     * @return list<array{label: string, url: string, new_tab: bool, active: bool, current: bool, children: list<array<string, mixed>>}>
      */
     public function tree(string $location): array
     {
@@ -28,24 +30,41 @@ class Menus
         }
 
         try {
-            $menu = Menu::query()
-                ->where('location', $location)
-                ->with(['items.page', 'items.post', 'items.category', 'items.children.page', 'items.children.post', 'items.children.category'])
-                ->first();
+            $menu = Menu::query()->where('location', $location)->with(self::eagerLoads())->first();
         } catch (Throwable) {
             return [];
         }
 
-        $items = $menu ? $this->map($menu->items) : [];
+        $items = $menu ? $this->map($menu->items, 1) : [];
 
         return $this->cache[$location] = $this->hooks->applyFilters('menu.items', $items, $location);
+    }
+
+    /** Levels of nesting the site shows (config press.menus.max_depth, 1–6). */
+    public static function maxDepth(): int
+    {
+        return max(1, min(6, (int) config('press.menus.max_depth', 3)));
+    }
+
+    /** @return list<string> items, items.children, … down to the deepest level, with their link targets */
+    private static function eagerLoads(): array
+    {
+        $loads = [];
+        $path = 'items';
+
+        for ($level = 1; $level <= self::maxDepth(); $level++) {
+            array_push($loads, $path.'.page', $path.'.post', $path.'.category');
+            $path .= '.children';
+        }
+
+        return $loads;
     }
 
     /**
      * @param  iterable<MenuItem>  $items
      * @return list<array<string, mixed>>
      */
-    private function map(iterable $items): array
+    private function map(iterable $items, int $level): array
     {
         $current = rtrim(request()->url(), '/');
         $out = [];
@@ -58,13 +77,16 @@ class Menus
             }
 
             $absolute = str_starts_with($url, '/') ? url($url) : $url;
+            $children = $level < self::maxDepth() && $item->relationLoaded('children') ? $this->map($item->children, $level + 1) : [];
+            $isCurrent = rtrim($absolute, '/') === $current;
 
             $out[] = [
                 'label' => $item->label,
                 'url' => $url,
                 'new_tab' => $item->open_in_new_tab,
-                'active' => rtrim($absolute, '/') === $current,
-                'children' => $item->relationLoaded('children') ? $this->map($item->children) : [],
+                'current' => $isCurrent,
+                'active' => $isCurrent || in_array(true, array_column($children, 'active'), true),
+                'children' => $children,
             ];
         }
 

@@ -27,6 +27,11 @@ return [
         'max_ratio' => 100,
     ],
 
+    // Menu items nest up to this many levels (1 = no dropdowns). Deeper items are not shown.
+    'menus' => [
+        'max_depth' => 3,
+    ],
+
     'revisions' => [
         'keep' => 25,
     ],

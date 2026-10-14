@@ -53,6 +53,7 @@
         </main>
 
         @include('press.partials.footer', ['siteName' => $siteName, 'tagline' => $tagline])
+        @include('press.partials.menu-script')
         @hook('body.end')
     </body>
 </html>

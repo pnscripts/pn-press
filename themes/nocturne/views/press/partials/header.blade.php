@@ -10,7 +10,7 @@
         @if ($showTagline && $tagline !== '')
             <p class="text-sm text-muted">{{ $tagline }}</p>
         @endif
-        <nav aria-label="Main" class="flex max-w-full flex-wrap justify-center gap-1 text-sm font-medium">
+        <nav aria-label="Main" data-press-nav class="flex max-w-full flex-wrap justify-center gap-1 text-sm font-medium">
             @forelse ($primary as $item)
                 @include('press.partials.nav-item', ['item' => $item])
             @empty

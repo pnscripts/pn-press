@@ -12,7 +12,7 @@
             </span>
         </a>
 
-        <nav aria-label="Main" class="-mx-1 flex max-w-full items-center gap-1 overflow-x-auto text-sm font-medium">
+        <nav aria-label="Main" data-press-nav class="-mx-1 flex max-w-full flex-wrap items-center gap-1 text-sm font-medium">
             @forelse ($primary as $item)
                 @include('press.partials.nav-item', ['item' => $item])
             @empty
