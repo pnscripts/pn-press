@@ -33,7 +33,7 @@ class DashboardTest extends TestCase
     {
         $this->get('/admin')
             ->assertOk()
-            ->assertSee('PN Press')
+            ->assertSee('PN Scripts Press')
             ->assertSeeLivewire(PostStatsOverview::class)
             ->assertSeeLivewire(LatestPosts::class)
             ->assertSeeLivewire(DraftsAwaitingReview::class)
@@ -45,7 +45,7 @@ class DashboardTest extends TestCase
     {
         $panel = Filament::getPanel('admin');
 
-        $this->assertSame('PN Press', $panel->getBrandName());
+        $this->assertSame('PN Scripts Press', $panel->getBrandName());
         $this->assertArrayHasKey('primary', $panel->getColors());
         $this->assertNotContains(FilamentInfoWidget::class, $panel->getWidgets());
     }

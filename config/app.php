@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'PN Press'),
+    'name' => env('APP_NAME', 'PN Scripts Press'),
 
     /*
     |--------------------------------------------------------------------------

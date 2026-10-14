@@ -4,22 +4,24 @@
 @section('description', $category->description ?: 'Posts in '.$category->name.'.')
 
 @section('content')
-    <section class="bg-navy-950 pb-10 text-white">
-        <div class="mx-auto max-w-6xl px-4 pt-8 sm:px-6 sm:pt-12">
-            <p class="text-sm font-semibold uppercase tracking-wider text-brand-300">Category</p>
-            <h1 class="mt-2 text-3xl font-semibold tracking-tight sm:text-5xl">{{ $category->name }}</h1>
-            @if ($category->description)
-                <p class="mt-3 max-w-2xl text-lg text-slate-300">{{ $category->description }}</p>
-            @endif
-            <x-blog.category-nav :categories="$categories" :active="$category->slug" class="mt-8" />
+    <section class="press-container pt-10 sm:pt-16">
+        <p class="press-eyebrow">Category</p>
+        <div class="mt-3 flex flex-col gap-6 border-b-2 border-ink pb-6 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+                <h1 class="font-display text-5xl font-semibold tracking-tight sm:text-6xl">{{ $category->name }}</h1>
+                @if ($category->description)
+                    <p class="mt-3 max-w-2xl text-lg text-muted">{{ $category->description }}</p>
+                @endif
+            </div>
+            <x-blog.category-nav :categories="$categories" :active="$category->slug" />
         </div>
     </section>
 
-    <div class="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
+    <div class="press-container py-10">
         @if ($posts->isEmpty())
-            <p class="rounded-2xl bg-white p-8 text-slate-600 ring-1 ring-slate-200">No published posts in this category yet.</p>
+            <p class="rounded-lg border border-dashed border-rule bg-surface p-8 text-muted">No published posts in this category yet.</p>
         @else
-            <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div class="divide-y divide-rule">
                 @foreach ($posts as $post)
                     <x-blog.post-card :post="$post" />
                 @endforeach

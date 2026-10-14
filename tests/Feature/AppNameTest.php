@@ -11,7 +11,7 @@ class AppNameTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_app_and_mail_names_default_to_pn_press_when_unset(): void
+    public function test_app_and_mail_names_default_to_pn_scripts_press_when_unset(): void
     {
         $repository = Env::getRepository();
         $keys = ['APP_NAME', 'MAIL_FROM_NAME'];
@@ -34,20 +34,20 @@ class AppNameTest extends TestCase
             }
         }
 
-        $this->assertSame('PN Press', $config['name']);
-        $this->assertSame('PN Press', $mail['from']['name']);
+        $this->assertSame('PN Scripts Press', $config['name']);
+        $this->assertSame('PN Scripts Press', $mail['from']['name']);
     }
 
     public function test_public_pages_show_the_configured_name_and_no_old_product_name(): void
     {
-        config(['app.name' => 'PN Press']);
+        config(['app.name' => 'PN Scripts Press']);
         $post = Post::factory()->published()->create();
 
         foreach (['/', '/blog/'.$post->slug] as $url) {
             $this->get($url)
                 ->assertOk()
                 ->assertSee('<title>', false)
-                ->assertSee('PN Press')
+                ->assertSee('PN Scripts Press')
                 ->assertDontSee('Laravel Blog CMS')
                 ->assertDontSee('a Laravel blog starter kit');
         }

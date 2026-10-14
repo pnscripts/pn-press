@@ -1,27 +1,26 @@
 @extends('layouts.app')
 
-@section('title', config('app.name'))
+@section('title', request()->routeIs('home') ? press_setting('site.name', config('app.name')) : 'Journal')
 
 @section('content')
-    <section class="bg-navy-950 pb-10 text-white">
-        <div class="mx-auto max-w-6xl px-4 pt-8 sm:px-6 sm:pt-12">
-            <p class="text-sm font-semibold uppercase tracking-wider text-brand-300">The blog</p>
-            <h1 class="mt-2 text-3xl font-semibold tracking-tight sm:text-5xl">Latest posts</h1>
-            <p class="mt-3 max-w-2xl text-lg text-slate-300">Articles, guides and notes, newest first.</p>
-            <x-blog.category-nav :categories="$categories" class="mt-8" />
+    <section class="press-container pt-10 sm:pt-16">
+        <p class="press-eyebrow">The journal</p>
+        <div class="mt-3 flex flex-col gap-6 border-b-2 border-ink pb-6 sm:flex-row sm:items-end sm:justify-between">
+            <h1 class="font-display text-5xl font-semibold tracking-tight sm:text-7xl">Latest writing</h1>
+            <x-blog.category-nav :categories="$categories" />
         </div>
     </section>
 
-    <div class="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
+    <div class="press-container py-10">
         @if ($posts->isEmpty())
-            <p class="rounded-2xl bg-white p-8 text-slate-600 ring-1 ring-slate-200">No published posts yet.</p>
+            <p class="rounded-lg border border-dashed border-rule bg-surface p-8 text-muted">No published posts yet.</p>
         @else
             @php($showFeatured = $posts->onFirstPage())
             @if ($showFeatured)
                 <x-blog.post-card :post="$posts->first()" featured />
             @endif
 
-            <div @class(['grid gap-6 sm:grid-cols-2 lg:grid-cols-3', 'mt-8' => $showFeatured])>
+            <div @class(['divide-y divide-rule', 'mt-10 border-t border-rule' => $showFeatured])>
                 @foreach ($showFeatured ? $posts->slice(1) : $posts as $post)
                     <x-blog.post-card :post="$post" />
                 @endforeach

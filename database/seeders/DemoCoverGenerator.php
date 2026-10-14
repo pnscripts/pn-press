@@ -23,9 +23,9 @@ final class DemoCoverGenerator
     /** Public directory, relative to public_path(), that holds the demo covers. */
     public const DIRECTORY = 'images/demo';
 
-    private const NAVY = ['#0a1630', '#0f2147', '#142a57'];
+    private const NAVY = ['#0f3b37', '#0f6e66', '#1b1a17'];
 
-    private const ACCENTS = ['#f67a3c', '#4f90ff', '#bcd3ff', '#ffb38a'];
+    private const ACCENTS = ['#f2c14e', '#f6f3ec', '#9fd8cf', '#e8835a'];
 
     private int $state = 1;
 
@@ -94,7 +94,7 @@ final class DemoCoverGenerator
       <stop offset="1" stop-color="{$glow}" stop-opacity="0"/>
     </radialGradient>
     <pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse">
-      <circle cx="2" cy="2" r="1.4" fill="#bcd3ff" fill-opacity=".12"/>
+      <circle cx="2" cy="2" r="1.4" fill="#f6f3ec" fill-opacity=".12"/>
     </pattern>
   </defs>
   <rect width="{$w}" height="{$h}" fill="url(#bg)"/>
@@ -149,7 +149,7 @@ SVG;
             $x += 72;
         }
 
-        return $out.'  <rect x="200" y="520" width="800" height="4" rx="2" fill="#bcd3ff" fill-opacity=".35"/>'."\n";
+        return $out.'  <rect x="200" y="520" width="800" height="4" rx="2" fill="#f6f3ec" fill-opacity=".35"/>'."\n";
     }
 
     private function waves(): string
