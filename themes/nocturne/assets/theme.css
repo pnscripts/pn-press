@@ -1,0 +1,12 @@
+/* Nocturne: dark surfaces. Accent and highlight come from the theme settings. */
+:root {
+    --press-paper: #111014;
+    --press-surface: #19181e;
+    --press-ink: #ecebf1;
+    --press-muted: #a9a6b4;
+    --press-rule: #2c2a33;
+    --press-accent-ink: #111014;
+    color-scheme: dark;
+}
+
+.press-prose code { background: #2c2a33; }
