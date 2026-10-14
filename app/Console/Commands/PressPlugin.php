@@ -17,6 +17,9 @@ class PressPlugin extends Command
 
     public function handle(PluginManager $plugins): int
     {
+        // Changing the active plugins drops a stale route cache; say so, so it can be rebuilt.
+        add_action('routes.cache_cleared', fn () => $this->warn('The route cache was cleared because the active plugins changed. Run php artisan route:cache to rebuild it.'));
+
         $target = (string) $this->argument('target');
 
         try {

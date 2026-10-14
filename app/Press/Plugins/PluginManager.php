@@ -7,9 +7,11 @@ use App\Press\Hooks;
 use App\Press\Packages\InvalidPackage;
 use App\Press\Packages\PackageInstaller;
 use App\Press\Settings;
+use Filament\Contracts\Plugin as FilamentPlugin;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Throwable;
@@ -21,7 +23,13 @@ use Throwable;
  * table only records which ones are active. Active plugins are loaded on every request:
  * PSR-4 autoload, service provider, views (namespace = slug) and migrations path.
  *
- * Lifecycle hooks: plugin.loaded, plugin.activated, plugin.deactivated, plugin.uninstalling.
+ * Route files (manifest "routes") are loaded with the application's routes, so they are part of
+ * `php artisan route:cache`; the press.plugin middleware answers 404 once a plugin is no longer active.
+ * Admin screens (manifest "admin") are Filament plugins added to the panel while it is built.
+ * Changing which plugins are active clears a stale route cache.
+ *
+ * Lifecycle hooks: plugin.loaded, plugin.activated, plugin.deactivated, plugin.uninstalling,
+ * routes.cache_cleared.
  */
 class PluginManager
 {
@@ -36,6 +44,12 @@ class PluginManager
 
     /** @var array<string, bool>|null */
     private ?array $states = null;
+
+    /** @var array<string, true> */
+    private array $routesRegistered = [];
+
+    /** @var array<string, ?string> slug => version recorded when it was activated or last upgraded */
+    private array $versions = [];
 
     public function __construct(
         private readonly Application $app,
@@ -112,6 +126,7 @@ class PluginManager
 
             try {
                 $this->load($manifest);
+                $this->upgradeIfNeeded($manifest);
             } catch (Throwable $e) {
                 // A broken plugin must not take the site down: report it and carry on without it.
                 report($e);
@@ -137,6 +152,7 @@ class PluginManager
             'activated_at' => now(),
         ]);
         $this->states = null;
+        $this->forgetRouteCache();
 
         $this->hooks->doAction('plugin.activated', $manifest);
 
@@ -149,6 +165,7 @@ class PluginManager
 
         Plugin::query()->where('slug', $slug)->update(['enabled' => false]);
         $this->states = null;
+        $this->forgetRouteCache();
 
         if ($manifest) {
             $this->hooks->doAction('plugin.deactivated', $manifest);
@@ -228,11 +245,78 @@ class PluginManager
             }
 
             $this->app->register($manifest->provider);
-            $this->refreshRoutes();
         }
+
+        // Activated during this request: its route file has not been loaded yet.
+        if (! $this->routesAreCached()) {
+            $this->registerRoutesFor($manifest);
+        }
+
+        $this->refreshRoutes();
 
         $this->loaded[$manifest->slug] = true;
         $this->hooks->doAction('plugin.loaded', $manifest);
+    }
+
+    /**
+     * Load the route files of the active plugins. Called from bootstrap/app.php while the
+     * application's routes load, which is also what `php artisan route:cache` serialises.
+     */
+    public function registerRoutes(): void
+    {
+        foreach ($this->states() as $slug => $enabled) {
+            if ($enabled && ($manifest = $this->find($slug))) {
+                $this->registerRoutesFor($manifest);
+            }
+        }
+    }
+
+    /**
+     * Filament plugins of the active plugins, for the admin panel.
+     *
+     * @return list<FilamentPlugin>
+     */
+    public function filamentPlugins(): array
+    {
+        $plugins = [];
+
+        foreach ($this->states() as $slug => $enabled) {
+            $manifest = $enabled ? $this->find($slug) : null;
+
+            if (! $manifest || $manifest->admin === null) {
+                continue;
+            }
+
+            try {
+                $this->registerAutoload($manifest);
+
+                if (! class_exists($manifest->admin) || ! is_subclass_of($manifest->admin, FilamentPlugin::class)) {
+                    throw new InvalidPackage("{$manifest->name}: admin class {$manifest->admin} must implement ".FilamentPlugin::class.'.');
+                }
+
+                $plugins[] = $this->app->make($manifest->admin);
+            } catch (Throwable $e) {
+                report($e);
+            }
+        }
+
+        return $plugins;
+    }
+
+    /**
+     * Cached routes only hold the plugins that were active when they were cached. Drop the cache
+     * when that changes; `php artisan route:cache` rebuilds it with the current set.
+     */
+    public function forgetRouteCache(): bool
+    {
+        if (! $this->routesAreCached()) {
+            return false;
+        }
+
+        $this->files->delete($this->app->getCachedRoutesPath());
+        $this->hooks->doAction('routes.cache_cleared');
+
+        return true;
     }
 
     public function isLoaded(string $slug): bool
@@ -251,11 +335,43 @@ class PluginManager
         }
     }
 
+    private function registerRoutesFor(PluginManifest $manifest): void
+    {
+        $file = $manifest->file($manifest->routes);
+
+        if (isset($this->routesRegistered[$manifest->slug]) || ! is_file($file)) {
+            return;
+        }
+
+        $this->routesRegistered[$manifest->slug] = true;
+        $this->registerAutoload($manifest);
+
+        Route::middleware(['web', 'press.plugin:'.$manifest->slug])->group($file);
+    }
+
+    private function routesAreCached(): bool
+    {
+        return method_exists($this->app, 'routesAreCached') && $this->app->routesAreCached();
+    }
+
     private function registerAutoload(PluginManifest $manifest): void
     {
         foreach ($manifest->psr4 as $prefix => $dir) {
             PluginAutoloader::add($prefix, $manifest->file($dir));
         }
+    }
+
+    /** A plugin folder replaced with a newer version runs its new migrations once, on the next request. */
+    private function upgradeIfNeeded(PluginManifest $manifest): void
+    {
+        if (($this->versions[$manifest->slug] ?? $manifest->version) === $manifest->version) {
+            return;
+        }
+
+        $this->migrate($manifest);
+        Plugin::query()->where('slug', $manifest->slug)->update(['version' => $manifest->version, 'name' => $manifest->name]);
+        $this->versions[$manifest->slug] = $manifest->version;
+        $this->hooks->doAction('plugin.upgraded', $manifest);
     }
 
     private function migrate(PluginManifest $manifest): void
@@ -275,7 +391,10 @@ class PluginManager
         }
 
         try {
-            return $this->states = Plugin::query()->pluck('enabled', 'slug')->map(fn ($v) => (bool) $v)->all();
+            $rows = Plugin::query()->get(['slug', 'enabled', 'version']);
+            $this->versions = $rows->pluck('version', 'slug')->all();
+
+            return $this->states = $rows->mapWithKeys(fn (Plugin $row) => [$row->slug => (bool) $row->enabled])->all();
         } catch (Throwable) {
             return []; // Not migrated yet.
         }

@@ -109,6 +109,12 @@ class Plugins extends Page implements HasTable
 
     private function run(\Closure $operation, string $success): void
     {
+        add_action('routes.cache_cleared', fn () => Notification::make()
+            ->title('Route cache cleared')
+            ->body('The active plugins changed, so the cached routes were out of date. Run php artisan route:cache to rebuild them.')
+            ->warning()
+            ->send());
+
         try {
             $operation();
             Notification::make()->title($success)->success()->send();

@@ -208,6 +208,61 @@ class PluginLifecycleTest extends TestCase
         $this->assertDirectoryDoesNotExist($this->pluginsPath.'/hello-press');
     }
 
+    public function test_route_files_load_on_activation_and_answer_404_once_deactivated(): void
+    {
+        $plugin = $this->pluginFiles();
+        $files = $plugin['files'];
+        $files['hello-press/routes/web.php'] = "<?php\nuse Illuminate\\Support\\Facades\\Route;\nRoute::get('/route-file-{$plugin['suffix']}', fn () => 'from the route file')->name('hello-press.page');\n";
+        $this->manager()->installZip($this->makeZip($files));
+
+        $this->manager()->activate('hello-press');
+
+        $this->assertSame(url('/route-file-'.$plugin['suffix']), route('hello-press.page'));
+        $this->get('/route-file-'.$plugin['suffix'])->assertOk()->assertSee('from the route file');
+
+        // The route stays registered for the rest of this request (and in a stale route cache),
+        // but the press.plugin middleware refuses it.
+        $this->manager()->deactivate('hello-press');
+        $this->get('/route-file-'.$plugin['suffix'])->assertNotFound();
+    }
+
+    public function test_a_replaced_plugin_runs_its_new_migrations_on_the_next_request(): void
+    {
+        $plugin = $this->pluginFiles();
+        $this->manager()->installZip($this->makeZip($plugin['files']));
+        $this->manager()->activate('hello-press');
+
+        // Same code (PHP cannot load a class twice in one process), new version and a new migration.
+        $files = $plugin['files'];
+        $files['hello-press/plugin.json'] = str_replace('"1.0.0"', '"1.1.0"', $files['hello-press/plugin.json']);
+        $extra = $plugin['table'].'_extra';
+        $files["hello-press/database/migrations/2026_02_01_000000_create_{$extra}_table.php"] = "<?php\nuse Illuminate\\Database\\Migrations\\Migration;\nuse Illuminate\\Support\\Facades\\Schema;\nreturn new class extends Migration { public function up(): void { Schema::create('{$extra}', fn (\$t) => \$t->id()); } public function down(): void { Schema::dropIfExists('{$extra}'); } };\n";
+        $this->manager()->installZip($this->makeZip($files), replace: true);
+        $this->assertFalse(Schema::hasTable($extra));
+
+        $this->freshManager()->bootActive();
+
+        $this->assertTrue(Schema::hasTable($extra));
+        $this->assertDatabaseHas('plugins', ['slug' => 'hello-press', 'version' => '1.1.0']);
+    }
+
+    public function test_admin_classes_must_be_filament_plugins(): void
+    {
+        $plugin = $this->pluginFiles();
+        $files = $plugin['files'];
+        $manifest = json_decode($files['hello-press/plugin.json'], true);
+        $manifest['admin'] = $plugin['namespace'].'\\HelloServiceProvider';
+        $files['hello-press/plugin.json'] = json_encode($manifest);
+        $this->manager()->installZip($this->makeZip($files));
+        $this->manager()->activate('hello-press');
+
+        $this->assertSame([], $this->freshManager()->filamentPlugins());
+
+        $manifest['admin'] = 'not a class';
+        File::put($this->pluginsPath.'/hello-press/plugin.json', json_encode($manifest));
+        $this->assertStringContainsString('admin', $this->freshManager()->errors()['hello-press']);
+    }
+
     private function freshManager(): PluginManager
     {
         app()->forgetInstance(PluginManager::class);

@@ -18,8 +18,14 @@ use App\Press\Packages\Manifest;
  *       "provider": "PnPress\\ContactForm\\ContactFormServiceProvider",
  *       "autoload": { "psr-4": { "PnPress\\ContactForm\\": "src/" } },
  *       "migrations": "database/migrations",
- *       "views": "resources/views"
+ *       "views": "resources/views",
+ *       "routes": "routes/web.php",
+ *       "admin": "PnPress\\ContactForm\\ContactFormAdmin"
  *     }
+ *
+ * "routes" is a route file loaded with the "web" middleware (it is part of `php artisan route:cache`).
+ * "admin" is a Filament plugin class (Filament\Contracts\Plugin) that adds resources, pages,
+ * widgets or navigation items to the admin panel.
  */
 class PluginManifest extends Manifest
 {
@@ -32,6 +38,10 @@ class PluginManifest extends Manifest
 
     public readonly string $views;
 
+    public readonly string $routes;
+
+    public readonly ?string $admin;
+
     public function __construct(string $path, array $data)
     {
         parent::__construct($path, $data);
@@ -39,6 +49,11 @@ class PluginManifest extends Manifest
         $provider = $data['provider'] ?? null;
         if ($provider !== null && (! is_string($provider) || ! preg_match('/^[A-Za-z_][A-Za-z0-9_]*(\\\\[A-Za-z_][A-Za-z0-9_]*)+$/', $provider))) {
             throw new InvalidPackage('"provider" must be a namespaced class name.');
+        }
+
+        $admin = $data['admin'] ?? null;
+        if ($admin !== null && (! is_string($admin) || ! preg_match('/^[A-Za-z_][A-Za-z0-9_]*(\\\\[A-Za-z_][A-Za-z0-9_]*)+$/', $admin))) {
+            throw new InvalidPackage('"admin" must be a namespaced class name.');
         }
 
         $psr4 = [];
@@ -58,6 +73,8 @@ class PluginManifest extends Manifest
         $this->psr4 = $psr4;
         $this->migrations = $this->relativePath($data['migrations'] ?? null, 'database/migrations');
         $this->views = $this->relativePath($data['views'] ?? null, 'resources/views');
+        $this->routes = $this->relativePath($data['routes'] ?? null, 'routes/web.php');
+        $this->admin = $admin;
     }
 
     public static function filename(): string

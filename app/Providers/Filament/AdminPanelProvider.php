@@ -2,6 +2,8 @@
 
 namespace App\Providers\Filament;
 
+use App\Press\Plugins\PluginManager;
+use Filament\FontProviders\BunnyFontProvider;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -42,7 +44,7 @@ class AdminPanelProvider extends PanelProvider
                 'info' => Color::Sky,
                 'warning' => Color::hex('#d99a1e'),
             ])
-            ->font('Inter', provider: \Filament\FontProviders\BunnyFontProvider::class)
+            ->font('Inter', provider: BunnyFontProvider::class)
             ->sidebarCollapsibleOnDesktop()
             // The wordmark uses the Press display face.
             ->renderHook(PanelsRenderHook::HEAD_END, fn (): string => '<link href="https://fonts.bunny.net/css?family=fraunces:600" rel="stylesheet">')
@@ -54,6 +56,8 @@ class AdminPanelProvider extends PanelProvider
             ])
             // Dashboard widgets live in app/Filament/Widgets (stats, recent posts, drafts, posts by category).
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
+            // Active PN Scripts Press plugins add their own resources, pages and navigation (plugin.json "admin").
+            ->plugins(app(PluginManager::class)->filamentPlugins())
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
