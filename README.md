@@ -49,17 +49,17 @@ Filament login stays at `/admin`. Only users with the `admin` or `editor` role c
 - Revisions: every page save keeps the previous version (last 25); restore any of them from the page editor.
 - Blog: posts and categories at `/blog`, `/blog/{slug}`, `/category/{slug}`, with drafts and scheduled posts hidden from visitors.
 - SEO: meta title, description, social image and "hide from search engines" on pages; meta title and description on posts; canonical and Open Graph tags; `/sitemap.xml` from the SEO Sitemap plugin.
-- Menus: a main and a footer location, with one level of dropdowns, pointing at pages, posts, categories, the blog or any safe link. Links to unpublished pages are left out automatically.
-- Media library: upload images and PDFs, with alt text and captions, and use them in blocks.
-- Settings: site name, tagline, footer text, home page, posts per page. Plugins add their own sections.
+- Menus: a main and a footer location, with nested dropdowns (three levels by default, `press.menus.max_depth`), pointing at pages, posts, categories, the blog or any safe link. Dropdowns work without JavaScript and by keyboard (Enter, Escape, arrow keys). Links to unpublished pages are left out automatically.
+- Media library: upload images and PDFs, with alt text and captions. Image blocks pick from the library with thumbnails, search and a browse grid, or upload a new image on the spot.
+- Settings: site name (a fresh install is called "PN Scripts Press"), tagline, footer text, home page, posts per page. Plugins add their own sections.
 - Users and roles: `admin` can do everything; `editor` manages pages, posts, media and menus. Capabilities: `manage plugins`, `manage themes`, `manage settings`, `manage users`, `manage menus`, `manage pages`, `manage media`.
 
 **Plugins** (Extend → Plugins, or `php artisan press:plugin`)
 
-- A plugin is a folder in `plugins/` with a `plugin.json`: its own PSR-4 namespace, a Laravel service provider, views and migrations.
-- Install from an uploaded `.zip` or a folder on the server, then activate (runs its migrations), deactivate, or uninstall (rolls its tables back, removes its settings and folder).
+- A plugin is a folder in `plugins/` with a `plugin.json`: its own PSR-4 namespace, a Laravel service provider, views, migrations, a route file (works with `php artisan route:cache`) and admin screens (a Filament plugin class adding resources, pages and navigation).
+- Install from an uploaded `.zip` or a folder on the server, then activate (runs its migrations), deactivate, or uninstall (rolls its tables back, removes its settings and folder). Replacing a plugin with a newer version runs its new migrations on the next request.
 - Actions and filters, WordPress style: `add_action`, `do_action`, `add_filter`, `apply_filters`, and `@hook('head')` in Blade.
-- Examples: **Contact Form** (a block, a route, its own table, a settings section, a honeypot and a rate limit) and **SEO Sitemap** (`/sitemap.xml` and a head link).
+- Examples: **Contact Form** (a block, a route, its own table, a settings section, a honeypot, a rate limit and a *Messages* inbox to read, mark handled, delete and export messages as CSV) and **SEO Sitemap** (`/sitemap.xml` and a head link).
 
 **Themes** (Appearance → Themes, or `php artisan press:theme`)
 
@@ -78,7 +78,6 @@ Guides: [writing a plugin](docs/plugins.md) and [writing a theme](docs/themes.md
 
 - Comments, multi-tenancy, multilingual content
 - A plugin or theme directory, automatic updates or remote installs (on purpose)
-- Admin screens added by plugins (plugins can add settings sections, blocks, routes and hooks today)
 - Production-ready Telescope access (the `viewTelescope` allowlist is empty on purpose)
 
 ## Tests
