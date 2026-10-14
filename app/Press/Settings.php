@@ -90,9 +90,23 @@ class Settings
             ->all();
     }
 
+    /** The product name a fresh install shows until Settings › Site name is filled in. */
+    public const DEFAULT_SITE_NAME = 'PN Scripts Press';
+
+    /**
+     * Settings › Site name, else APP_NAME, else "PN Scripts Press". Laravel's stock "Laravel" counts as unset.
+     */
     public function siteName(): string
     {
-        return (string) $this->get('site.name', config('app.name'));
+        $name = trim((string) $this->get('site.name', ''));
+
+        if ($name !== '') {
+            return $name;
+        }
+
+        $appName = trim((string) config('app.name'));
+
+        return $appName !== '' && $appName !== 'Laravel' ? $appName : self::DEFAULT_SITE_NAME;
     }
 
     public function flush(): void

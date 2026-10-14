@@ -3,6 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\Post;
+use App\Press\Settings;
+use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Env;
 use Tests\TestCase;
@@ -51,5 +53,40 @@ class AppNameTest extends TestCase
                 ->assertDontSee('Laravel Blog CMS')
                 ->assertDontSee('a Laravel blog starter kit');
         }
+    }
+
+    public function test_a_fresh_install_is_called_pn_scripts_press_even_with_laravels_stock_name(): void
+    {
+        foreach (['Laravel', '', null] as $stock) {
+            config(['app.name' => $stock]);
+            app(Settings::class)->flush();
+
+            $this->assertSame('PN Scripts Press', app(Settings::class)->siteName());
+            $this->get('/blog')->assertOk()->assertSee('<title>Journal · PN Scripts Press', false)->assertDontSee('Laravel</');
+        }
+
+        // An APP_NAME of your own still wins, and Settings › Site name wins over both.
+        config(['app.name' => 'Ink & Paper']);
+        $this->assertSame('Ink & Paper', app(Settings::class)->siteName());
+        app(Settings::class)->set('site.name', 'The Quarterly');
+        $this->assertSame('The Quarterly', app(Settings::class)->siteName());
+    }
+
+    public function test_the_demo_seed_stores_the_default_site_name_and_keeps_an_existing_one(): void
+    {
+        config(['app.name' => 'Laravel']);
+        $this->seed(DatabaseSeeder::class);
+
+        $this->assertSame('PN Scripts Press', app(Settings::class)->get('site.name'));
+        $this->get('/')->assertOk()->assertSee('PN Scripts Press');
+
+        app(Settings::class)->set('site.name', 'Mine');
+        $this->seed(DatabaseSeeder::class);
+        $this->assertSame('Mine', app(Settings::class)->get('site.name'));
+    }
+
+    public function test_the_example_environment_file_names_the_product(): void
+    {
+        $this->assertMatchesRegularExpression('/^APP_NAME="PN Scripts Press"$/m', file_get_contents(base_path('.env.example')));
     }
 }

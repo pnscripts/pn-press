@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Enums\PostStatus;
+use App\Models\Category;
 use App\Models\Menu;
 use App\Models\Page;
 use App\Models\Plugin;
@@ -21,6 +22,11 @@ class DemoSite extends Seeder
     {
         $settings = app(Settings::class);
         $author = User::query()->where('email', 'admin@example.com')->value('id');
+
+        // Fresh installs are called "PN Scripts Press" (or APP_NAME) until it is changed in Settings.
+        if (blank($settings->get('site.name'))) {
+            $settings->set('site.name', $settings->siteName());
+        }
 
         if ($settings->get('site.tagline') === null) {
             $settings->setMany([
@@ -81,7 +87,17 @@ class DemoSite extends Seeder
         if (! Menu::query()->where('location', 'primary')->exists()) {
             $menu = Menu::query()->create(['name' => 'Main menu', 'location' => 'primary']);
             $menu->items()->create(['label' => 'Home', 'type' => 'url', 'url' => '/', 'sort_order' => 1]);
-            $menu->items()->create(['label' => 'Journal', 'type' => 'blog', 'sort_order' => 2]);
+            $journal = $menu->items()->create(['label' => 'Journal', 'type' => 'blog', 'sort_order' => 2]);
+
+            // A dropdown with a sub-menu: Journal › categories › the newest post of the first one.
+            Category::query()->orderBy('name')->get()->each(function (Category $category, int $index) use ($journal) {
+                $item = $journal->children()->create(['label' => $category->name, 'type' => 'category', 'category_id' => $category->id, 'sort_order' => $index + 1]);
+
+                if ($index === 0 && ($post = $category->posts()->published()->latest('published_at')->first())) {
+                    $item->children()->create(['label' => $post->title, 'type' => 'post', 'post_id' => $post->id, 'sort_order' => 1]);
+                }
+            });
+
             $menu->items()->create(['label' => 'About', 'type' => 'page', 'page_id' => $about->id, 'sort_order' => 3]);
             $menu->items()->create(['label' => 'Contact', 'type' => 'page', 'page_id' => $contact->id, 'sort_order' => 4]);
         }

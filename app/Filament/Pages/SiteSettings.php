@@ -66,7 +66,7 @@ class SiteSettings extends Page
     {
         $sections = [
             Section::make('Site')->columns(2)->schema([
-                TextInput::make('site.name')->label('Site name')->placeholder(config('app.name'))->maxLength(80),
+                TextInput::make('site.name')->label('Site name')->placeholder(fn () => app(Settings::class)->siteName())->maxLength(80),
                 TextInput::make('site.tagline')->label('Tagline')->maxLength(160),
                 Textarea::make('site.footer_text')->label('Footer text')->rows(2)->maxLength(400)->columnSpanFull(),
             ]),

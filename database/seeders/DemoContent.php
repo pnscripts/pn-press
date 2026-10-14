@@ -49,7 +49,7 @@ final class DemoContent
 <p>Everything else happens in the admin panel at <code>/admin</code>. Sign in with the demo account from the README and you will land on a dashboard that shows what is published, what is still a draft and what is coming up.</p>
 <h2>Change these first</h2>
 <ul>
-<li><strong>The site name.</strong> Set <code>APP_NAME</code> in your <code>.env</code> file. It appears in the header, the footer and the browser tab.</li>
+<li><strong>The site name.</strong> Open <em>Settings</em> in the admin and change <em>Site name</em>. It appears in the header, the footer and the browser tab, and starts out as PN Scripts Press.</li>
 <li><strong>The admin password.</strong> The seeded account is for local use only. Change the email and password before the site goes anywhere public.</li>
 <li><strong>The demo posts.</strong> Edit them, unpublish them or delete them. They exist to show the layout, not to stay.</li>
 </ul>
