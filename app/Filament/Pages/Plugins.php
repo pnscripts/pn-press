@@ -7,6 +7,7 @@ use App\Press\Packages\InvalidPackage;
 use App\Press\Permissions;
 use App\Press\Plugins\PluginManager;
 use App\Press\Plugins\PluginManifest;
+use App\Press\Updates\UpdateChecker;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
@@ -44,6 +45,24 @@ class Plugins extends Page implements HasTable
         return app(PluginManager::class);
     }
 
+    /** Number of plugin updates (and a core update) waiting, shown next to "Plugins" in the menu. */
+    public static function getNavigationBadge(): ?string
+    {
+        $count = count(array_filter(array_keys(app(UpdateChecker::class)->available()), fn (string $key) => ! str_starts_with($key, 'theme:')));
+
+        return $count > 0 ? (string) $count : null;
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'warning';
+    }
+
+    public static function getNavigationBadgeTooltip(): ?string
+    {
+        return 'Updates available';
+    }
+
     protected function getHeaderActions(): array
     {
         return [
@@ -55,8 +74,14 @@ class Plugins extends Page implements HasTable
     {
         $errors = collect($this->manager()->errors())
             ->map(fn ($error, $folder) => Text::make("plugins/{$folder}: {$error}")->color('danger'))
+            ->merge(collect($this->manager()->bootProblems())->map(fn ($problem, $slug) => Text::make("{$slug}: {$problem}")->color('danger')))
             ->values()
             ->all();
+
+        $core = app(UpdateChecker::class)->for('core');
+        if ($core) {
+            $errors[] = Text::make("PN Scripts Press {$core['version']} is available (this site runs {$core['installed']}).".($core['url'] ? " Release notes: {$core['url']}" : ''))->color('warning');
+        }
 
         return $schema->components([...$errors, EmbeddedTable::make()]);
     }
@@ -72,11 +97,23 @@ class Plugins extends Page implements HasTable
                     'version' => $plugin->version,
                     'author' => $plugin->author,
                     'active' => $this->manager()->isActive($plugin->slug),
+                    'needs' => $this->manager()->unmetRequirements($plugin) ? 'Needs '.implode('; ', $this->manager()->unmetRequirements($plugin)) : null,
+                    'requires' => $plugin->requiresPlugins ? 'Requires '.implode(', ', array_map(fn ($slug) => $this->manager()->find($slug)->name ?? $slug, array_keys($plugin->requiresPlugins))) : null,
+                    'update' => app(UpdateChecker::class)->for('plugin:'.$plugin->slug),
                 ])
                 ->all())
             ->columns([
-                TextColumn::make('name')->weight('semibold')->description(fn (array $record) => $record['description'])->wrap(),
+                TextColumn::make('name')->weight('semibold')
+                    ->description(fn (array $record) => trim(implode(' ', array_filter([$record['description'], $record['requires'] ? $record['requires'].'.' : null, $record['active'] ? null : $record['needs']]))))
+                    ->wrap(),
                 TextColumn::make('version')->badge()->color('gray'),
+                TextColumn::make('update')
+                    ->label('Update')
+                    ->badge()
+                    ->color('warning')
+                    ->state(fn (array $record) => $record['update'] ? $record['update']['version'].' available' : null)
+                    ->url(fn (array $record) => $record['update']['url'] ?? null, shouldOpenInNewTab: true)
+                    ->placeholder('—'),
                 TextColumn::make('author')->placeholder('—'),
                 TextColumn::make('active')
                     ->label('Status')

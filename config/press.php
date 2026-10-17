@@ -50,6 +50,15 @@ return [
         'except' => ['admin', 'admin/*', 'livewire/*', 'up'],
     ],
 
+    /*
+    | Update notices (App\Press\Updates\UpdateChecker): a daily GET of small JSON files. Nothing is
+    | downloaded or installed. Plugins/themes opt in with "update_url" in their manifest.
+    */
+    'updates' => [
+        'enabled' => (bool) env('PRESS_UPDATE_CHECKS', true),
+        'core_url' => env('PRESS_UPDATE_URL', 'https://api.github.com/repos/pnscripts/pn-press/releases/latest'),
+    ],
+
     'revisions' => [
         'keep' => 25,
     ],

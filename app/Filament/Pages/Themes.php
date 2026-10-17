@@ -7,6 +7,7 @@ use App\Press\Packages\InvalidPackage;
 use App\Press\Permissions;
 use App\Press\Themes\ThemeManager;
 use App\Press\Themes\ThemeManifest;
+use App\Press\Updates\UpdateChecker;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\ColorPicker;
@@ -81,6 +82,7 @@ class Themes extends Page implements HasTable
                     'screenshot' => $theme->screenshot ? $this->manager()->assetUrl($theme->screenshot, $theme) : null,
                     'active' => $theme->slug === $active,
                     'has_settings' => $this->manager()->fields($theme) !== [],
+                    'update' => app(UpdateChecker::class)->for('theme:'.$theme->slug),
                 ])
                 ->sortByDesc('active')
                 ->all())
@@ -88,6 +90,13 @@ class Themes extends Page implements HasTable
                 ImageColumn::make('screenshot')->label('')->imageWidth(160)->imageHeight(100),
                 TextColumn::make('name')->weight('semibold')->description(fn (array $record) => $record['description'])->wrap(),
                 TextColumn::make('version')->badge()->color('gray'),
+                TextColumn::make('update')
+                    ->label('Update')
+                    ->badge()
+                    ->color('warning')
+                    ->state(fn (array $record) => $record['update'] ? $record['update']['version'].' available' : null)
+                    ->url(fn (array $record) => $record['update']['url'] ?? null, shouldOpenInNewTab: true)
+                    ->placeholder('—'),
                 TextColumn::make('active')
                     ->label('Status')
                     ->badge()

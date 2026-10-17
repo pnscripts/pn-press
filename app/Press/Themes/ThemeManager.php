@@ -208,6 +208,10 @@ class ThemeManager
             throw new InvalidPackage("{$theme->name} needs PN Scripts Press {$theme->requiresPress}.");
         }
 
+        if ($unmet = $theme->unmetPlatformRequirements((string) config('press.version'))) {
+            throw new InvalidPackage("{$theme->name} needs ".implode('; ', $unmet).'.');
+        }
+
         if ($problem = $this->problem($theme)) {
             throw new InvalidPackage($problem.' Install the parent theme first.');
         }
