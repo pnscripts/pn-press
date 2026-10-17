@@ -3,7 +3,14 @@
     "name": "pnscripts/pn-press",
     "type": "project",
     "description": "PN Scripts Press: a Laravel 13 + Filament 5 CMS with block pages, menus, media, SEO, revisions, and WordPress-style plugins and themes.",
-    "keywords": ["laravel", "filament", "blog", "cms", "plugins", "themes"],
+    "keywords": [
+        "laravel",
+        "filament",
+        "blog",
+        "cms",
+        "plugins",
+        "themes"
+    ],
     "license": "MIT",
     "authors": [
         {
@@ -25,6 +32,7 @@
     "require-dev": {
         "barryvdh/laravel-debugbar": "^4.0",
         "fakerphp/faker": "^1.23",
+        "larastan/larastan": "^3.13",
         "laravel/pail": "^1.2.2",
         "laravel/pint": "^1.30",
         "laravel/sail": "^1.67",
@@ -72,6 +80,9 @@
         "test": [
             "@php artisan config:clear --ansi",
             "@php artisan test"
+        ],
+        "analyse": [
+            "@php -d memory_limit=1G vendor/bin/phpstan analyse --no-progress"
         ]
     },
     "extra": {
