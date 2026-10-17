@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Models\Page as CmsPage;
+use App\Press\I18n\Locales;
 use App\Press\Permissions;
 use App\Press\Settings;
 use BackedEnum;
@@ -73,12 +74,31 @@ class SiteSettings extends Page
             Section::make('Reading')->columns(2)->schema([
                 Select::make('reading.home_page_id')
                     ->label('Home page')
-                    ->options(fn () => CmsPage::query()->orderBy('title')->pluck('title', 'id'))
+                    ->options(fn () => CmsPage::query()->where('locale', app(Locales::class)->default())->orderBy('title')->pluck('title', 'id'))
                     ->placeholder('Latest posts (the blog)')
                     ->searchable(),
                 TextInput::make('reading.posts_per_page')->label('Posts per page')->numeric()->minValue(1)->maxValue(50)->placeholder('10'),
             ]),
         ];
+
+        // One section per extra language: its own site name, tagline, footer text and home page (empty = the default language's).
+        $locales = app(Locales::class);
+        foreach ($locales->prefixed() as $code) {
+            $sections[] = Section::make('Language: '.$locales->name($code))
+                ->description('Shown at /'.$code.'. Leave a field empty to use the '.$locales->name($locales->default()).' value.')
+                ->columns(2)
+                ->collapsible()
+                ->schema([
+                    TextInput::make("site.i18n.{$code}.name")->label('Site name')->maxLength(80),
+                    TextInput::make("site.i18n.{$code}.tagline")->label('Tagline')->maxLength(160),
+                    Textarea::make("site.i18n.{$code}.footer_text")->label('Footer text')->rows(2)->maxLength(400)->columnSpanFull(),
+                    Select::make("reading.i18n.{$code}.home_page_id")
+                        ->label('Home page')
+                        ->options(fn () => CmsPage::query()->where('locale', $code)->orderBy('title')->pluck('title', 'id'))
+                        ->placeholder('Latest posts (the blog)')
+                        ->searchable(),
+                ]);
+        }
 
         return $schema
             ->components(apply_filters('settings.sections', $sections))

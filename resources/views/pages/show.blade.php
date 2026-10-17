@@ -11,7 +11,7 @@
 
 @section('content')
     @unless ($page->isPublic())
-        <p class="bg-highlight px-4 py-2 text-center text-sm font-medium text-[#1b1a17]">Preview: this page is not published.</p>
+        <p class="bg-highlight px-4 py-2 text-center text-sm font-medium text-[#1b1a17]">{{ __('Preview: this page is not published.') }}</p>
     @endunless
 
     @if ($page->template !== 'landing')

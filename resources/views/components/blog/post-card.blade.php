@@ -12,7 +12,7 @@
                 <p class="press-eyebrow">{{ $post->category->name }}</p>
             @endif
             <h2 class="mt-3 font-display text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
-                <a href="{{ route('posts.show', $post->slug) }}" class="after:absolute after:inset-0 group-hover:underline group-hover:decoration-highlight group-hover:decoration-4 group-hover:underline-offset-4">{{ $post->title }}</a>
+                <a href="{{ $post->url() }}" class="after:absolute after:inset-0 group-hover:underline group-hover:decoration-highlight group-hover:decoration-4 group-hover:underline-offset-4">{{ $post->title }}</a>
             </h2>
             <p class="mt-4 text-lg text-muted">{{ $post->excerpt }}</p>
             <x-blog.post-meta :post="$post" class="mt-5" />
@@ -26,7 +26,7 @@
                 <p class="press-eyebrow">{{ $post->category->name }}</p>
             @endif
             <h2 class="mt-2 font-display text-2xl font-semibold leading-snug tracking-tight">
-                <a href="{{ route('posts.show', $post->slug) }}" class="after:absolute after:inset-0 group-hover:underline group-hover:decoration-highlight group-hover:decoration-4 group-hover:underline-offset-4">{{ $post->title }}</a>
+                <a href="{{ $post->url() }}" class="after:absolute after:inset-0 group-hover:underline group-hover:decoration-highlight group-hover:decoration-4 group-hover:underline-offset-4">{{ $post->title }}</a>
             </h2>
             <p class="mt-2 text-muted">{{ $post->excerpt }}</p>
         </div>

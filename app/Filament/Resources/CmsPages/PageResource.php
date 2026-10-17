@@ -7,8 +7,10 @@ use App\Filament\Resources\CmsPages\Pages\CreatePage;
 use App\Filament\Resources\CmsPages\Pages\EditPage;
 use App\Filament\Resources\CmsPages\Pages\ListPages;
 use App\Filament\Resources\CmsPages\RelationManagers\RevisionsRelationManager;
+use App\Filament\Support\Translatable;
 use App\Models\Page;
 use App\Press\Blocks\BlockRegistry;
+use App\Press\I18n\Locales;
 use App\Press\Permissions;
 use App\Press\Settings;
 use App\Press\Themes\ThemeManager;
@@ -26,6 +28,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
@@ -62,6 +65,7 @@ class PageResource extends Resource
                 ->persistTabInQueryString()
                 ->tabs([
                     Tabs\Tab::make('Content')->icon('heroicon-o-pencil-square')->schema([
+                        Translatable::localeField(),
                         TextInput::make('title')
                             ->required()
                             ->maxLength(255)
@@ -84,14 +88,26 @@ class PageResource extends Resource
                             ->required()
                             ->maxLength(120)
                             ->alphaDash()
-                            ->rule(fn (?Page $record) => function (string $attribute, $value, \Closure $fail) use ($record) {
-                                if (in_array(Str::lower((string) $value), config('press.reserved_slugs'), true) && ! ($record?->parent_id)) {
+                            ->rule(fn (?Page $record, Get $get) => function (string $attribute, $value, \Closure $fail) use ($get) {
+                                // Top-level slugs may not take a core route or a language prefix (/bg).
+                                $reserved = array_merge(config('press.reserved_slugs'), app(Locales::class)->prefixed());
+                                if (in_array(Str::lower((string) $value), $reserved, true) && blank($get('parent_id'))) {
                                     $fail('This address is used by PN Scripts Press itself.');
+                                }
+                            })
+                            ->rule(fn (?Page $record, Get $get) => function (string $attribute, $value, \Closure $fail) use ($record, $get) {
+                                // The full path (parent path + slug) must be free in this language.
+                                $parent = filled($get('parent_id')) ? Page::query()->find($get('parent_id')) : null;
+                                $path = ltrim(($parent ? $parent->path.'/' : '').Str::slug((string) $value), '/');
+                                $taken = Page::query()->where('locale', Translatable::formLocale($get))->where('path', $path)
+                                    ->when($record, fn ($query) => $query->whereKeyNot($record->getKey()))->exists();
+                                if ($taken) {
+                                    $fail('Another page in this language already has this address.');
                                 }
                             }),
                         Select::make('parent_id')
                             ->label('Parent page')
-                            ->relationship('parent', 'title', fn ($query, ?Page $record) => $record ? $query->whereKeyNot($record->getKey()) : $query)
+                            ->relationship('parent', 'title', fn ($query, ?Page $record, Get $get) => $query->where('locale', Translatable::formLocale($get))->when($record, fn ($q) => $q->whereKeyNot($record->getKey())))
                             ->searchable()
                             ->preload(),
                         Select::make('status')
@@ -119,7 +135,8 @@ class PageResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('title')->searchable()->sortable()->description(fn (Page $record) => '/'.$record->path),
+                TextColumn::make('title')->searchable()->sortable()->description(fn (Page $record) => app(Locales::class)->path($record->path, $record->locale)),
+                Translatable::column(),
                 TextColumn::make('status')
                     ->badge()
                     ->state(fn (Page $record) => $record->isPublic() ? 'Published' : ($record->status === PostStatus::Published ? 'Scheduled' : 'Draft'))
@@ -139,6 +156,7 @@ class PageResource extends Resource
             ->defaultSort('updated_at', 'desc')
             ->filters([
                 SelectFilter::make('status')->options([PostStatus::Draft->value => 'Draft', PostStatus::Published->value => 'Published']),
+                Translatable::filter(),
             ])
             ->recordActions([
                 Action::make('view')
@@ -148,13 +166,22 @@ class PageResource extends Resource
                     ->label('Set as home')
                     ->icon('heroicon-o-home')
                     ->visible(fn (Page $record) => ! $record->isHome() && Auth::user()?->can(Permissions::MANAGE_SETTINGS))
-                    ->action(fn (Page $record) => app(Settings::class)->set('reading.home_page_id', $record->getKey())),
+                    ->action(fn (Page $record) => app(Settings::class)->set(self::homeSettingKey($record->locale), $record->getKey())),
+                Translatable::action(self::class),
                 EditAction::make(),
                 DeleteAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([DeleteBulkAction::make()]),
             ]);
+    }
+
+    /** Settings key of the home page for a language: reading.home_page_id, reading.i18n.bg.home_page_id… */
+    public static function homeSettingKey(?string $locale): string
+    {
+        $locales = app(Locales::class);
+
+        return $locale === null || $locale === $locales->default() ? 'reading.home_page_id' : 'reading.i18n.'.$locale.'.home_page_id';
     }
 
     public static function getRelations(): array

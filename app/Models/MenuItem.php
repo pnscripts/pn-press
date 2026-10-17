@@ -41,16 +41,19 @@ class MenuItem extends Model
         return $this->hasMany(MenuItem::class, 'parent_id')->orderBy('sort_order');
     }
 
+    /** @return BelongsTo<Page, $this> */
     public function page(): BelongsTo
     {
         return $this->belongsTo(Page::class);
     }
 
+    /** @return BelongsTo<Post, $this> */
     public function post(): BelongsTo
     {
         return $this->belongsTo(Post::class);
     }
 
+    /** @return BelongsTo<Category, $this> */
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
@@ -64,9 +67,9 @@ class MenuItem extends Model
         return match ($this->type) {
             'page' => $this->page?->isPublic() ? $this->page->url() : null,
             'post' => $this->post && $this->post->status === PostStatus::Published && $this->post->published_at?->isPast()
-                ? route('posts.show', $this->post->slug) : null,
-            'category' => $this->category ? route('categories.show', $this->category->slug) : null,
-            'blog' => route('blog'),
+                ? $this->post->url() : null,
+            'category' => $this->category?->url(),
+            'blog' => press_route('blog'),
             default => self::safeUrl($this->url),
         };
     }

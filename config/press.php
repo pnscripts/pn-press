@@ -10,7 +10,23 @@ return [
     | package passes the checks in App\Press\Packages\ZipValidator.
     */
 
-    'version' => '1.0.0',
+    'version' => '1.1.0',
+
+    /*
+    | Languages (App\Press\I18n\Locales). One code = a single-language site (no prefixes, no switcher).
+    | The default language lives at "/", every other one under its prefix: /bg/blog, /bg/about.
+    | Pages, posts, categories and menus carry a locale; translations of one item share a
+    | translation_group and are linked with hreflang and the language switcher.
+    */
+    'locales' => array_values(array_filter(array_map('trim', explode(',', (string) env('PRESS_LOCALES', 'en'))))),
+
+    'default_locale' => env('PRESS_DEFAULT_LOCALE'),
+
+    // Names shown in the language switcher and the admin. Add a line for any other language code.
+    'locale_names' => [
+        'en' => 'English', 'bg' => 'Български', 'de' => 'Deutsch', 'fr' => 'Français', 'es' => 'Español',
+        'it' => 'Italiano', 'ro' => 'Română', 'el' => 'Ελληνικά', 'tr' => 'Türkçe', 'uk' => 'Українська',
+    ],
 
     'plugins_path' => env('PRESS_PLUGINS_PATH', base_path('plugins')),
 

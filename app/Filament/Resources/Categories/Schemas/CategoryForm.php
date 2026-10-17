@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Categories\Schemas;
 
+use App\Filament\Support\Translatable;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Utilities\Set;
@@ -14,6 +15,7 @@ class CategoryForm
     {
         return $schema
             ->components([
+                Translatable::localeField(),
                 TextInput::make('name')
                     ->required()
                     ->maxLength(255)
@@ -26,7 +28,7 @@ class CategoryForm
                 TextInput::make('slug')
                     ->required()
                     ->maxLength(255)
-                    ->unique(ignoreRecord: true),
+                    ->unique(ignoreRecord: true, modifyRuleUsing: Translatable::uniquePerLocale()),
                 Textarea::make('description')
                     ->rows(3)
                     ->columnSpanFull(),

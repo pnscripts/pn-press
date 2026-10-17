@@ -13,28 +13,10 @@ parameters:
 			path: app/Filament/Pages/Themes.php
 
 		-
-			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\PostStatus\:\:Published will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 1
-			path: app/Filament/Resources/CmsPages/PageResource.php
-
-		-
 			message: '#^Property App\\Filament\\Widgets\\DraftsAwaitingReview\:\:\$columnSpan \(array\<string, int\|null\>\|int\|string\) does not accept default value of type array\<string, int\|string\>\.$#'
 			identifier: property.defaultValue
 			count: 1
 			path: app/Filament/Widgets/DraftsAwaitingReview.php
-
-		-
-			message: '#^Cannot call method isFuture\(\) on string\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/Filament/Widgets/LatestPosts.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\PostStatus\:\:Draft will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 1
-			path: app/Filament/Widgets/LatestPosts.php
 
 		-
 			message: '#^Parameter \#1 \$chart of method Filament\\Widgets\\StatsOverviewWidget\\Stat\:\:chart\(\) expects array\<float\>\|Illuminate\\Contracts\\Support\\Arrayable\|null, list\<int\> given\.$#'
@@ -49,67 +31,13 @@ parameters:
 			path: app/Filament/Widgets/PostsByCategoryChart.php
 
 		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany\:\:published\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Http/Controllers/CategoryController.php
-
-		-
 			message: '#^Call to function method_exists\(\) with App\\Models\\User and ''canAccessPanel'' will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
 			count: 1
 			path: app/Http/Controllers/PageController.php
 
 		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\:\:published\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Http/Controllers/PostController.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$published_at\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/MenuItem.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$slug\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Models/MenuItem.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$status\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/MenuItem.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:isPublic\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Models/MenuItem.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:url\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Models/MenuItem.php
-
-		-
-			message: '#^Cannot call method lte\(\) on string\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: app/Models/Page.php
-
-		-
 			message: '#^Parameter \#1 \$attributes of method Illuminate\\Database\\Eloquent\\Model\:\:fill\(\) expects array\<string, mixed\>, array\<int, string\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Models/Page.php
-
-		-
-			message: '#^Parameter \#1 \$callback of method Illuminate\\Support\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:each\(\) expects callable\(Illuminate\\Database\\Eloquent\\Model, int\)\: mixed, Closure\(App\\Models\\Page\)\: void given\.$#'
 			identifier: argument.type
 			count: 1
 			path: app/Models/Page.php
@@ -125,30 +53,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/Models/Page.php
-
-		-
-			message: '#^Result of && is always false\.$#'
-			identifier: booleanAnd.alwaysFalse
-			count: 3
-			path: app/Models/Page.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\PostStatus\:\:Published will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 2
-			path: app/Models/Page.php
-
-		-
-			message: '#^Result of && is always false\.$#'
-			identifier: booleanAnd.alwaysFalse
-			count: 1
-			path: app/Models/Post.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\PostStatus\:\:Published will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 1
-			path: app/Models/Post.php
 
 		-
 			message: '#^Parameter \#1 \$items of method App\\Press\\Menus\:\:map\(\) expects iterable\<App\\Models\\MenuItem\>, Illuminate\\Database\\Eloquent\\Collection\<int, Illuminate\\Database\\Eloquent\\Model\> given\.$#'
@@ -209,9 +113,3 @@ parameters:
 			identifier: property.notFound
 			count: 1
 			path: plugins/contact-form/src/MessagesCsv.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\:\:published\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: plugins/seo-sitemap/src/Http/SitemapController.php

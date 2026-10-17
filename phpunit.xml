@@ -31,5 +31,6 @@
         <env name="SESSION_DRIVER" value="array"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="PRESS_PAGE_CACHE" value="false"/>
+        <env name="PRESS_LOCALES" value="en,bg"/>
     </php>
 </phpunit>

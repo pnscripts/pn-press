@@ -1,7 +1,7 @@
 {
     "slug": "contact-form",
     "name": "Contact Form",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "description": "A contact form block for any page, with an inbox in the admin. Messages are stored in the database and, when a recipient is set, emailed.",
     "author": "PN Scripts",
     "requires": { "press": ">=1.0" },

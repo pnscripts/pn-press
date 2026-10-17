@@ -3,6 +3,7 @@
 namespace App\Press;
 
 use App\Models\Setting;
+use App\Press\I18n\Locales;
 use Illuminate\Support\Arr;
 use Throwable;
 
@@ -94,6 +95,27 @@ class Settings
             ->all();
     }
 
+    /**
+     * A setting in a language: "site.name" in Bulgarian is stored as "site.i18n.bg.name" and falls back
+     * to "site.name" when empty. The default language always reads the plain key.
+     */
+    public function localized(string $key, ?string $locale = null, mixed $default = null): mixed
+    {
+        $locales = app(Locales::class);
+        $locale ??= $locales->current();
+
+        if ($locale !== $locales->default() && str_contains($key, '.')) {
+            [$group, $rest] = explode('.', $key, 2);
+            $value = $this->get($group.'.i18n.'.$locale.'.'.$rest);
+
+            if ($value !== null && $value !== '') {
+                return $value;
+            }
+        }
+
+        return $this->get($key, $default);
+    }
+
     /** The product name a fresh install shows until Settings › Site name is filled in. */
     public const DEFAULT_SITE_NAME = 'PN Scripts Press';
 
@@ -105,7 +127,7 @@ class Settings
      */
     public function siteName(): string
     {
-        $name = trim((string) $this->get('site.name', ''));
+        $name = trim((string) $this->localized('site.name', null, ''));
 
         if ($name !== '') {
             return $name;

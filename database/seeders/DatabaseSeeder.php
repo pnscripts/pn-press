@@ -6,8 +6,9 @@ use App\Enums\PostStatus;
 use App\Models\Category;
 use App\Models\Post;
 use App\Models\User;
-use Illuminate\Database\Seeder;
+use App\Press\I18n\Locales;
 use App\Press\Permissions;
+use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 
 /**
@@ -34,10 +35,12 @@ class DatabaseSeeder extends Seeder
 
         $admin->assignRole($adminRole);
 
+        $locale = app(Locales::class)->default();
+
         $categories = collect(DemoContent::categories())
             ->mapWithKeys(fn (array $attributes) => [
                 $attributes['slug'] => Category::query()->firstOrCreate(
-                    ['slug' => $attributes['slug']],
+                    ['slug' => $attributes['slug'], 'locale' => $locale],
                     $attributes
                 ),
             ]);
@@ -50,7 +53,7 @@ class DatabaseSeeder extends Seeder
                 : null;
 
             $record = Post::query()->firstOrCreate(
-                ['slug' => $post['slug']],
+                ['slug' => $post['slug'], 'locale' => $locale],
                 [
                     'user_id' => $admin->id,
                     'category_id' => $categories[$post['category']]->id,

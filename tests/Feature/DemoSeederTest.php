@@ -20,8 +20,8 @@ class DemoSeederTest extends TestCase
     {
         $this->seed(DatabaseSeeder::class);
 
-        $this->assertSame(count(DemoContent::posts()), Post::query()->count());
-        $this->assertSame(count(DemoContent::categories()), Category::query()->count());
+        $this->assertSame(count(DemoContent::posts()), Post::query()->where('locale', 'en')->count());
+        $this->assertSame(count(DemoContent::categories()), Category::query()->where('locale', 'en')->count());
         $this->assertGreaterThanOrEqual(6, Post::query()->published()->count());
         $this->assertGreaterThanOrEqual(1, Post::query()->where('status', PostStatus::Draft)->count());
         $this->assertGreaterThanOrEqual(1, Post::query()->where('status', PostStatus::Published)->where('published_at', '>', now())->count());
@@ -37,8 +37,8 @@ class DemoSeederTest extends TestCase
 
         $this->seed(DatabaseSeeder::class);
 
-        $this->assertSame(count(DemoContent::posts()), Post::query()->count());
-        $this->assertSame(count(DemoContent::categories()), Category::query()->count());
+        $this->assertSame(count(DemoContent::posts()), Post::query()->where('locale', 'en')->count());
+        $this->assertSame(count(DemoContent::categories()), Category::query()->where('locale', 'en')->count());
         $this->assertSame(1, User::query()->where('email', 'admin@example.com')->count());
         $this->assertSame('Edited in the admin', $post->fresh()->title);
     }
@@ -65,7 +65,7 @@ class DemoSeederTest extends TestCase
                 $this->assertStringNotContainsString($placeholder, $text, "Post [{$post->slug}] contains placeholder text.");
             }
 
-            $this->assertGreaterThan(40, str_word_count(strip_tags($post->body)), "Post [{$post->slug}] body is too short.");
+            $this->assertGreaterThan(40, preg_match_all('/\p{L}+/u', strip_tags($post->body)), "Post [{$post->slug}] body is too short.");
         }
     }
 

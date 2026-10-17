@@ -6,7 +6,7 @@
             @if ($tagline !== '')
                 <p class="mt-2 max-w-md text-sm text-muted">{{ $tagline }}</p>
             @endif
-            @if ($footerText = press_setting('site.footer_text'))
+            @if ($footerText = app(\App\Press\Settings::class)->localized('site.footer_text'))
                 <p class="mt-4 max-w-md text-sm text-muted">{{ $footerText }}</p>
             @endif
         </div>
@@ -24,7 +24,7 @@
     <div class="border-t border-rule">
         <div class="press-container flex flex-col gap-1 py-5 text-xs text-muted sm:flex-row sm:justify-between">
             <p>&copy; {{ now()->year }} {{ $siteName }}</p>
-            <p>Published with <a href="https://pnscripts.com/products/pn-press" class="font-medium text-accent hover:underline">PN Scripts Press</a></p>
+            <p>{{ __('Published with') }} <a href="https://pnscripts.com/products/pn-press" class="font-medium text-accent hover:underline">PN Scripts Press</a></p>
         </div>
     </div>
 </footer>

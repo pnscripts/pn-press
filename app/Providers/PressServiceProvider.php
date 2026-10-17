@@ -13,6 +13,7 @@ use App\Press\Blocks\BlockRegistry;
 use App\Press\Blocks\CoreBlocks;
 use App\Press\Cache\PageCache;
 use App\Press\Hooks;
+use App\Press\I18n\Locales;
 use App\Press\Menus;
 use App\Press\Plugins\PluginManager;
 use App\Press\Settings;
@@ -29,6 +30,7 @@ class PressServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(Hooks::class);
+        $this->app->scoped(Locales::class);
         $this->app->singleton(Settings::class);
         $this->app->singleton(BlockRegistry::class);
         $this->app->singleton(Menus::class);
