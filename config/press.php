@@ -59,6 +59,11 @@ return [
         'core_url' => env('PRESS_UPDATE_URL', 'https://api.github.com/repos/pnscripts/pn-press/releases/latest'),
     ],
 
+    'admin' => [
+        // Every admin/editor must set up an authenticator app before using the panel.
+        'require_2fa' => (bool) env('PRESS_REQUIRE_2FA', false),
+    ],
+
     'revisions' => [
         'keep' => 25,
     ],
