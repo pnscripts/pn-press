@@ -38,6 +38,29 @@ my-theme/
 }
 ```
 
+## Child themes
+
+A child theme changes a few things of another theme and inherits the rest, so the parent can be updated without losing your changes. Add `"parent"` to `theme.json`:
+
+```json
+{
+    "slug": "folio-acme",
+    "name": "Folio for Acme",
+    "version": "1.0.0",
+    "parent": "folio",
+    "stylesheet": "assets/acme.css",
+    "settings": [
+        { "key": "accent", "label": "Accent colour", "type": "color", "default": "#c2410c" }
+    ]
+}
+```
+
+- **Views:** the child's `views/` is searched first, then the parent's, then the defaults. Ship only the views you change.
+- **Assets:** `theme_asset('assets/logo.svg')` and `/theme-assets/<child>/assets/...` serve the child's file, or the parent's when the child has none.
+- **Styles:** both stylesheets load, the parent's first, so the child's rules win.
+- **Settings and templates:** the parent's fields and templates are offered too; a child field with the same `key` replaces the parent's (above: a different default accent). Values are saved per child theme.
+- The parent must be installed, and it cannot itself be a child (one level, like WordPress). Activation is refused with the reason otherwise, and a parent cannot be deleted while a child theme of it is installed.
+
 ## Overriding views
 
 The active theme's `views/` folder is searched before `resources/views`, so copy any default view into the same path in your theme and change it. Views you do not copy keep working. Useful ones:

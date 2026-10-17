@@ -52,11 +52,15 @@ Filament login stays at `/admin`. Only users with the `admin` or `editor` role c
 - Menus: a main and a footer location, with nested dropdowns (three levels by default, `press.menus.max_depth`), pointing at pages, posts, categories, the blog or any safe link. Dropdowns work without JavaScript and by keyboard (Enter, Escape, arrow keys). Links to unpublished pages are left out automatically.
 - Media library: upload images and PDFs, with alt text and captions. Image blocks pick from the library with thumbnails, search and a browse grid, or upload a new image on the spot.
 - Settings: site name (a fresh install is called "PN Scripts Press"), tagline, footer text, home page, posts per page. Plugins add their own sections.
+- Page cache: anonymous visitors get pages from a full-page cache (`X-Press-Cache: HIT`). Entries expire when the next scheduled post or page goes live, and every change to content, menus, settings, plugins or themes clears them, so scheduled publishing and edits show on time. Pages with a form, signed-in users, theme previews and unknown query strings are never cached. On when `APP_DEBUG=false` (or `PRESS_PAGE_CACHE=true`); after deploying new theme or view files run `php artisan press:page-cache clear`.
+- Two-factor sign-in: every admin user can add an authenticator app (with recovery codes) on their profile page; `PRESS_REQUIRE_2FA=true` makes it mandatory.
 - Users and roles: `admin` can do everything; `editor` manages pages, posts, media and menus. Capabilities: `manage plugins`, `manage themes`, `manage settings`, `manage users`, `manage menus`, `manage pages`, `manage media`.
 
 **Plugins** (Extend → Plugins, or `php artisan press:plugin`)
 
 - A plugin is a folder in `plugins/` with a `plugin.json`: its own PSR-4 namespace, a Laravel service provider, views, migrations, a route file (works with `php artisan route:cache`) and admin screens (a Filament plugin class adding resources, pages and navigation).
+- Dependencies: `requires.plugins`, `requires.php` and `requires.extensions` in `plugin.json`; a plugin activates only when what it needs is there, and a plugin that others need cannot be switched off under them.
+- Update notices: the admin shows when a newer PN Scripts Press, plugin or theme exists (daily `press:check-updates`; plugins and themes opt in with `update_url`). Nothing is downloaded or installed automatically.
 - Install from an uploaded `.zip` or a folder on the server, then activate (runs its migrations), deactivate, or uninstall (rolls its tables back, removes its settings and folder). Replacing a plugin with a newer version runs its new migrations on the next request.
 - Actions and filters, WordPress style: `add_action`, `do_action`, `add_filter`, `apply_filters`, and `@hook('head')` in Blade.
 - Examples: **Contact Form** (a block, a route, its own table, a settings section, a honeypot, a rate limit and a *Messages* inbox to read, mark handled, delete and export messages as CSV) and **SEO Sitemap** (`/sitemap.xml` and a head link).
@@ -65,6 +69,7 @@ Filament login stays at `/admin`. Only users with the `admin` or `editor` role c
 
 - A theme is a folder in `themes/` with a `theme.json`. Any view in its `views/` replaces the default with the same name.
 - Settings declared in `theme.json` (colours, choices, toggles, text) are edited in the admin and reach the page as CSS variables and `data-*` attributes.
+- Child themes: `"parent": "folio"` inherits the parent's views, assets, settings and templates; the child ships only what it changes.
 - Preview a theme before activating it, add page templates, ship a stylesheet and screenshot.
 - Two themes: **Folio** (default; warm paper, ink type, teal accent, serif headings) and **Nocturne** (dark, violet accent, centred masthead).
 
@@ -76,7 +81,8 @@ Guides: [writing a plugin](docs/plugins.md) and [writing a theme](docs/themes.md
 
 ## What is not included
 
-- Comments, multi-tenancy, multilingual content
+- Comments, multi-tenancy, multilingual content (planned next: EN/BG pages and posts with hreflang and a language switcher)
+- A redirects manager and scheduled backups (planned)
 - A plugin or theme directory, automatic updates or remote installs (on purpose)
 - Production-ready Telescope access (the `viewTelescope` allowlist is empty on purpose)
 
@@ -84,6 +90,7 @@ Guides: [writing a plugin](docs/plugins.md) and [writing a theme](docs/themes.md
 
 ```bash
 php artisan test
+composer analyse   # Larastan (PHPStan level 5)
 ```
 
 ## More from PN Scripts

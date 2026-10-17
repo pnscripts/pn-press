@@ -2,6 +2,27 @@
 
 All notable changes to PN Scripts Press. Dates are in YYYY-MM-DD.
 
+## Unreleased
+
+### Added
+
+- **Page cache** for anonymous visitors that respects scheduled publishing: entries expire when the next scheduled post or page goes live and are cleared by any content, menu, settings, plugin or theme change. Pages with forms, Livewire components, flashed messages or extra cookies, signed-in users, theme previews and unknown query keys are never cached. `X-Press-Cache` header, `php artisan press:page-cache status|clear`, `PRESS_PAGE_CACHE`, `PRESS_PAGE_CACHE_TTL`, `PRESS_PAGE_CACHE_STORE`.
+- **Child themes:** `"parent"` in `theme.json` inherits views, assets, stylesheet, settings and templates. `theme_asset()` helper.
+- **Plugin dependencies:** `requires.plugins`, `requires.php`, `requires.extensions` (themes: PHP and extensions). Activation, deactivation and uninstall respect them; dependencies boot first; a plugin whose dependency vanished is skipped and reported.
+- **Update notices** for the core (GitHub latest release), plugins and themes (`update_url`): `php artisan press:check-updates`, scheduled daily; badges in the admin. Nothing is downloaded or installed.
+- **Two-factor sign-in** for the admin: profile page with authenticator app and recovery codes; `PRESS_REQUIRE_2FA`.
+- Larastan (PHPStan level 5) in CI, `composer analyse`.
+
+### Changed
+
+- symfony/yaml 8.1.9 (CVE-2026-109413).
+
+### Upgrade notes
+
+- Run `php artisan migrate` (two nullable columns on `users`).
+- The page cache is on when `APP_DEBUG=false`. Run `php artisan press:page-cache clear` after deploying view or theme files, or set `PRESS_PAGE_CACHE=false`.
+- Add the Laravel scheduler to cron for daily update checks: `* * * * * php artisan schedule:run`.
+
 ## 1.0.0 (2026-10-14)
 
 PN Scripts Press grows from a blog starter into a small CMS with WordPress-style plugins and themes, and its own design.
