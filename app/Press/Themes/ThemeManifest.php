@@ -24,12 +24,18 @@ use App\Press\Packages\Manifest;
  *
  * Views in views/ override the default views with the same name (layouts/app.blade.php,
  * press/blocks/hero.blade.php, posts/index.blade.php …).
+ *
+ * A child theme names its parent with "parent": "folio". It only ships what it changes:
+ * its views, assets/ files, templates and settings come first, everything else comes from
+ * the parent (both stylesheets load, parent first). A parent cannot itself be a child.
  */
 class ThemeManifest extends Manifest
 {
     public const SETTING_TYPES = ['color', 'text', 'select', 'toggle'];
 
     public readonly ?string $screenshot;
+
+    public readonly ?string $parent;
 
     public readonly ?string $stylesheet;
 
@@ -42,6 +48,12 @@ class ThemeManifest extends Manifest
     public function __construct(string $path, array $data)
     {
         parent::__construct($path, $data);
+
+        $parent = $data['parent'] ?? null;
+        if ($parent !== null && (! is_string($parent) || strlen($parent) > 64 || ! preg_match(self::SLUG_PATTERN, $parent) || $parent === $this->slug)) {
+            throw new InvalidPackage('"parent" must be the slug of another theme.');
+        }
+        $this->parent = $parent;
 
         $this->screenshot = isset($data['screenshot']) ? $this->relativePath($data['screenshot'], 'screenshot.svg') : null;
         $this->stylesheet = isset($data['stylesheet']) ? $this->relativePath($data['stylesheet'], 'assets/theme.css') : null;

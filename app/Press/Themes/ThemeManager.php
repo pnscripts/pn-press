@@ -94,12 +94,73 @@ class ThemeManager
     public function activeSlug(): ?string
     {
         foreach ([$this->settings->get('theme.active'), config('press.default_theme')] as $slug) {
-            if (is_string($slug) && $this->find($slug)) {
+            if (is_string($slug) && ($theme = $this->find($slug)) && $this->problem($theme) === null) {
                 return $slug;
             }
         }
 
         return null;
+    }
+
+    /** The parent of a child theme, if it is installed. */
+    public function parentOf(ThemeManifest $theme): ?ThemeManifest
+    {
+        return $theme->parent ? $this->find($theme->parent) : null;
+    }
+
+    /**
+     * The theme followed by its parent: where views, assets, templates and settings are looked up, in order.
+     *
+     * @return list<ThemeManifest>
+     */
+    public function lineage(ThemeManifest $theme): array
+    {
+        $parent = $this->parentOf($theme);
+
+        return $parent ? [$theme, $parent] : [$theme];
+    }
+
+    /** Why a theme cannot be used (missing or nested parent), or null when it can. */
+    public function problem(ThemeManifest $theme): ?string
+    {
+        if ($theme->parent === null) {
+            return null;
+        }
+
+        $parent = $this->find($theme->parent);
+
+        if ($parent === null) {
+            return "{$theme->name} is a child theme of \"{$theme->parent}\", which is not installed.";
+        }
+
+        if ($parent->parent !== null) {
+            return "{$theme->name} uses {$parent->name} as its parent, but {$parent->name} is itself a child theme.";
+        }
+
+        return null;
+    }
+
+    /** Child themes that depend on this theme. @return list<ThemeManifest> */
+    public function childrenOf(string $slug): array
+    {
+        return array_values(array_filter($this->all(), fn (ThemeManifest $theme) => $theme->parent === $slug));
+    }
+
+    /**
+     * Setting fields of a theme including its parent's; the child's field wins on the same key.
+     *
+     * @return list<array{key: string, label: string, type: string, default: mixed, options: array<string, string>}>
+     */
+    public function fields(ThemeManifest $theme): array
+    {
+        $fields = [];
+        foreach (array_reverse($this->lineage($theme)) as $layer) {
+            foreach ($layer->settings as $field) {
+                $fields[$field['key']] = $field;
+            }
+        }
+
+        return array_values($fields);
     }
 
     /** The theme of this request (the active one, or a preview). */
@@ -122,16 +183,18 @@ class ThemeManager
         $theme = $slug ? $this->find($slug) : null;
         $this->current = $theme?->slug;
 
-        $paths = $this->basePaths;
-        if ($theme && is_dir($theme->viewsPath())) {
-            array_unshift($paths, $theme->viewsPath());
+        $themePaths = [];
+        foreach ($theme ? $this->lineage($theme) : [] as $layer) {
+            if (is_dir($layer->viewsPath())) {
+                $themePaths[] = $layer->viewsPath();
+            }
         }
 
-        $finder->setPaths($paths);
+        $finder->setPaths(array_merge($themePaths, $this->basePaths));
         $finder->flush();
 
-        if ($theme && is_dir($theme->viewsPath())) {
-            View::replaceNamespace('theme', [$theme->viewsPath()]);
+        if ($themePaths !== []) {
+            View::replaceNamespace('theme', $themePaths);
         }
 
         $this->hooks->doAction('theme.applied', $theme);
@@ -143,6 +206,10 @@ class ThemeManager
 
         if (! $theme->isCompatible((string) config('press.version'))) {
             throw new InvalidPackage("{$theme->name} needs PN Scripts Press {$theme->requiresPress}.");
+        }
+
+        if ($problem = $this->problem($theme)) {
+            throw new InvalidPackage($problem.' Install the parent theme first.');
         }
 
         $this->settings->set('theme.active', $slug);
@@ -161,6 +228,10 @@ class ThemeManager
 
         if ($slug === config('press.default_theme')) {
             throw new InvalidPackage('The default theme cannot be deleted.');
+        }
+
+        if ($children = $this->childrenOf($slug)) {
+            throw new InvalidPackage("{$theme->name} is the parent of ".implode(', ', array_map(fn (ThemeManifest $child) => $child->name, $children)).'. Delete the child themes first.');
         }
 
         $this->settings->forget('theme.'.$slug);
@@ -199,7 +270,7 @@ class ThemeManager
         $saved = (array) $this->settings->get('theme.'.$theme->slug, []);
         $values = [];
 
-        foreach ($theme->settings as $field) {
+        foreach ($this->fields($theme) as $field) {
             $values[$field['key']] = $this->sanitize($field, $saved[$field['key']] ?? $field['default']);
         }
 
@@ -212,7 +283,7 @@ class ThemeManager
     public function saveSettings(ThemeManifest $theme, array $values): void
     {
         $clean = [];
-        foreach ($theme->settings as $field) {
+        foreach ($this->fields($theme) as $field) {
             $clean[$field['key']] = $this->sanitize($field, $values[$field['key']] ?? $field['default']);
         }
 
@@ -235,19 +306,25 @@ class ThemeManager
         }
 
         $vars = [];
-        foreach ($theme->settings as $field) {
-            $value = $this->settingsFor($theme)[$field['key']];
+        $values = $this->settingsFor($theme);
+        foreach ($this->fields($theme) as $field) {
+            $value = $values[$field['key']];
             if ($field['type'] === 'color' && is_string($value) && preg_match('/^#[0-9a-f]{3}(?:[0-9a-f]{3})?$/i', $value)) {
                 $vars[] = '--press-'.str_replace('_', '-', $field['key']).':'.$value;
             }
         }
 
         $css = $vars ? ':root{'.implode(';', $vars).'}' : '';
-        $link = $theme->stylesheet && is_file($theme->file($theme->stylesheet))
-            ? '<link rel="stylesheet" href="'.e($this->assetUrl($theme->stylesheet, $theme)).'">'
-            : '';
 
-        return new HtmlString(($css ? '<style id="press-theme-vars">'.$css.'</style>' : '').$link);
+        // Parent stylesheet first, so the child's rules win.
+        $links = '';
+        foreach (array_reverse($this->lineage($theme)) as $layer) {
+            if ($layer->stylesheet && is_file($layer->file($layer->stylesheet))) {
+                $links .= '<link rel="stylesheet" href="'.e($this->assetUrl($layer->stylesheet, $layer)).'">';
+            }
+        }
+
+        return new HtmlString(($css ? '<style id="press-theme-vars">'.$css.'</style>' : '').$links);
     }
 
     /** data-press-* attributes for <html>, from select and toggle settings. */
@@ -256,15 +333,34 @@ class ThemeManager
         $theme = $this->current();
         $attributes = ['data-press-theme="'.e($theme?->slug ?? 'none').'"'];
 
-        foreach ($theme?->settings ?? [] as $field) {
+        $values = $theme ? $this->settingsFor($theme) : [];
+        foreach ($theme ? $this->fields($theme) : [] as $field) {
             if (in_array($field['type'], ['select', 'toggle'], true)) {
-                $value = $this->settingsFor($theme)[$field['key']];
+                $value = $values[$field['key']];
                 $value = is_bool($value) ? ($value ? 'on' : 'off') : (string) $value;
                 $attributes[] = 'data-press-'.str_replace('_', '-', $field['key']).'="'.e($value).'"';
             }
         }
 
         return new HtmlString(implode(' ', $attributes));
+    }
+
+    /**
+     * The file behind a theme asset path, looked up in the theme and then its parent,
+     * so theme_asset('assets/…') in a child theme also finds files only the parent ships.
+     */
+    public function assetFile(ThemeManifest $theme, string $path): ?string
+    {
+        foreach ($this->lineage($theme) as $layer) {
+            $root = realpath($layer->path);
+            $file = realpath($layer->path.'/'.$path);
+
+            if ($root !== false && $file !== false && str_starts_with($file, $root.DIRECTORY_SEPARATOR) && is_file($file)) {
+                return $file;
+            }
+        }
+
+        return null;
     }
 
     public function assetUrl(string $path, ?ThemeManifest $theme = null): string
@@ -283,7 +379,12 @@ class ThemeManager
     {
         $templates = ['default' => 'Default', 'landing' => 'Landing (full width, no title)'];
 
-        return $this->hooks->applyFilters('page.templates', array_merge($templates, $this->current()?->templates ?? []));
+        $current = $this->current();
+        foreach ($current ? array_reverse($this->lineage($current)) : [] as $layer) {
+            $templates = array_merge($templates, $layer->templates);
+        }
+
+        return $this->hooks->applyFilters('page.templates', $templates);
     }
 
     /**

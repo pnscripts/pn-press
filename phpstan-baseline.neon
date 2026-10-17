@@ -7,7 +7,7 @@ parameters:
 			path: app/Filament/Pages/SiteSettings.php
 
 		-
-			message: '#^Using nullsafe property access "\?\-\>settings" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
 			path: app/Filament/Pages/Themes.php
@@ -181,19 +181,7 @@ parameters:
 			path: app/Press/Themes/ThemeManager.php
 
 		-
-			message: '#^Using nullsafe property access "\?\-\>settings" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Press/Themes/ThemeManager.php
-
-		-
 			message: '#^Using nullsafe property access "\?\-\>slug" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Press/Themes/ThemeManager.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>templates" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
 			path: app/Press/Themes/ThemeManager.php

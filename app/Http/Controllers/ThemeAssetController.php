@@ -6,7 +6,8 @@ use App\Press\Themes\ThemeManager;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /**
- * Serves files from a theme's assets/ folder (and its screenshot). Only static file types; never PHP.
+ * Serves files from a theme's assets/ folder (falling back to its parent theme's) and its screenshot.
+ * Only static file types; never PHP.
  */
 class ThemeAssetController extends Controller
 {
@@ -29,9 +30,9 @@ class ThemeAssetController extends Controller
         $isScreenshot = $manifest->screenshot !== null && $path === $manifest->screenshot;
         abort_unless($isScreenshot || str_starts_with($path, 'assets/'), 404);
 
-        $root = realpath($manifest->path);
-        $file = realpath($manifest->path.'/'.$path);
-        abort_if($root === false || $file === false || ! str_starts_with($file, $root.DIRECTORY_SEPARATOR) || ! is_file($file), 404);
+        // The theme's own file, else its parent's (child themes ship only what they change).
+        $file = $themes->assetFile($manifest, $path);
+        abort_if($file === null, 404);
 
         return response()->file($file, [
             'Content-Type' => self::TYPES[$extension],

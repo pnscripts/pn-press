@@ -2,6 +2,7 @@
 
 use App\Press\Hooks;
 use App\Press\Settings;
+use App\Press\Themes\ThemeManager;
 
 /*
 | WordPress-familiar helper functions for plugin and theme authors.
@@ -41,5 +42,13 @@ if (! function_exists('press_setting')) {
     function press_setting(string $key, mixed $default = null): mixed
     {
         return app(Settings::class)->get($key, $default);
+    }
+}
+
+if (! function_exists('theme_asset')) {
+    /** URL of a file in the current theme's folder (e.g. "assets/logo.svg"); child themes fall back to the parent's file. */
+    function theme_asset(string $path): string
+    {
+        return app(ThemeManager::class)->assetUrl($path);
     }
 }
