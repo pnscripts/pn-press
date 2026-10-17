@@ -66,6 +66,14 @@ class Post extends Model
                 $post->published_at = now();
             }
         });
+
+        // A published post whose slug changed keeps answering at its old address.
+        static::updated(function (Post $post): void {
+            if ($post->wasChanged('slug') && $post->getOriginal('status') === PostStatus::Published) {
+                $old = route(app(Locales::class)->routeName('posts.show', $post->locale), (string) $post->getOriginal('slug'), false);
+                Redirect::moved($old, parse_url($post->url(), PHP_URL_PATH) ?: '/');
+            }
+        });
     }
 
     /** @return BelongsTo<User, $this> */

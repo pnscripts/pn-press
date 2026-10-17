@@ -94,6 +94,12 @@ class Page extends Model
         });
 
         static::saved(function (Page $page): void {
+            // A public page that moved keeps answering at its old address.
+            if ($page->wasChanged('path') && $page->getOriginal('status') === PostStatus::Published) {
+                $locales = app(Locales::class);
+                Redirect::moved($locales->path((string) $page->getOriginal('path'), $page->locale), $locales->path($page->path, $page->locale));
+            }
+
             if ($page->wasChanged('path')) {
                 // Children carry the parent's path; re-save them so their paths follow.
                 $page->children()->get()->each(function (Page $child): void {
