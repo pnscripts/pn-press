@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\ApplyTheme;
+use App\Http\Middleware\CachePublicPages;
 use App\Http\Middleware\EnsurePluginIsActive;
 use App\Press\Plugins\PluginManager;
 use Illuminate\Foundation\Application;
@@ -16,7 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
         then: fn () => app(PluginManager::class)->registerRoutes(),
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->appendToGroup('web', ApplyTheme::class);
+        $middleware->appendToGroup('web', [ApplyTheme::class, CachePublicPages::class]);
         $middleware->alias(['press.plugin' => EnsurePluginIsActive::class]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

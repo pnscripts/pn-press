@@ -205,6 +205,7 @@ class PluginManager
         /** @var PluginManifest $manifest */
         $manifest = $this->installer->installZip($zipPath, 'plugin', PluginManifest::class, $this->path(), $replace);
         $this->manifests = null;
+        $this->hooks->doAction('plugin.installed', $manifest);
 
         return $manifest;
     }
@@ -214,6 +215,7 @@ class PluginManager
         /** @var PluginManifest $manifest */
         $manifest = $this->installer->installDirectory($directory, 'plugin', PluginManifest::class, $this->path(), $replace);
         $this->manifests = null;
+        $this->hooks->doAction('plugin.installed', $manifest);
 
         return $manifest;
     }

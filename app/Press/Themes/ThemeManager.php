@@ -166,6 +166,7 @@ class ThemeManager
         $this->settings->forget('theme.'.$slug);
         $this->files->deleteDirectory($theme->path);
         $this->manifests = null;
+        $this->hooks->doAction('theme.uninstalled', $theme);
     }
 
     public function installZip(string $zipPath, bool $replace = false): ThemeManifest
@@ -173,6 +174,7 @@ class ThemeManager
         /** @var ThemeManifest $theme */
         $theme = $this->installer->installZip($zipPath, 'theme', ThemeManifest::class, $this->path(), $replace);
         $this->manifests = null;
+        $this->hooks->doAction('theme.installed', $theme);
 
         return $theme;
     }
@@ -182,6 +184,7 @@ class ThemeManager
         /** @var ThemeManifest $theme */
         $theme = $this->installer->installDirectory($directory, 'theme', ThemeManifest::class, $this->path(), $replace);
         $this->manifests = null;
+        $this->hooks->doAction('theme.installed', $theme);
 
         return $theme;
     }

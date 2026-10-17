@@ -29,6 +29,7 @@ class Settings
         Setting::query()->updateOrCreate(['key' => $key], ['value' => $value]);
 
         $this->values = null;
+        $this->changed();
     }
 
     /**
@@ -41,6 +42,7 @@ class Settings
         }
 
         $this->values = null;
+        $this->changed();
     }
 
     public function forget(string $key): void
@@ -48,6 +50,7 @@ class Settings
         Setting::query()->where('key', $key)->delete();
 
         $this->values = null;
+        $this->changed();
     }
 
     /** Forget a key and every key below it ("plugin.contact-form" and "plugin.contact-form.*"). */
@@ -56,6 +59,7 @@ class Settings
         Setting::query()->where('key', $key)->orWhere('key', 'like', $key.'.%')->delete();
 
         $this->values = null;
+        $this->changed();
     }
 
     /**
@@ -110,6 +114,12 @@ class Settings
         $appName = trim((string) config('app.name'));
 
         return $appName !== '' && ! in_array($appName, self::STOCK_APP_NAMES, true) ? $appName : self::DEFAULT_SITE_NAME;
+    }
+
+    /** Tells listeners (the page cache) that a setting changed. */
+    private function changed(): void
+    {
+        app(Hooks::class)->doAction('settings.changed');
     }
 
     public function flush(): void
