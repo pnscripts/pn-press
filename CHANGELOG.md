@@ -16,6 +16,15 @@ All notable changes to PN Scripts Press. Dates are in YYYY-MM-DD.
 - **Two-factor sign-in** for the admin: profile page with authenticator app and recovery codes; `PRESS_REQUIRE_2FA`.
 - Larastan (PHPStan level 5) in CI, `composer analyse`.
 
+### Security
+
+Review of the 1.1 code paths (sign-in and 2FA, page cache keys, uploads, plugin loading, languages, redirects):
+
+- **Stored XSS from editors closed:** post bodies and Text blocks are sanitised on output (Symfony HtmlSanitizer via Filament), so an editor's HTML can no longer run scripts for visitors or signed-in admins.
+- **SVG uploads** with scripts, event handlers, `javascript:` links, foreign HTML, entities or external references are refused and deleted (they are served from the site's own address).
+- **Trusted hosts:** outside `local`/testing only the `APP_URL` host and its subdomains are answered, so a forged `Host` header cannot fill the page cache or poison absolute links. Make sure `APP_URL` is your real address in production.
+- Redirect targets are limited to site paths and http(s) URLs (no `//host`, no script URLs); the `locale` sent by forms is accepted only when it is a configured language; language codes in `PRESS_LOCALES` are validated.
+
 ### Changed
 
 - symfony/yaml 8.1.9 (CVE-2026-109413).
@@ -28,6 +37,7 @@ All notable changes to PN Scripts Press. Dates are in YYYY-MM-DD.
 
 - Back up the database, then `composer install` and run `php artisan migrate`: 2FA columns on `users`, `locale` + `translation_group` on pages/posts/categories (existing rows get the default language), slug/path uniqueness becomes per language, `locale` on menus, and the `redirects` table. All migrations are reversible.
 - Nothing changes for visitors until you list a second language: without `PRESS_LOCALES` the site stays single-language. To add Bulgarian set `PRESS_LOCALES=en,bg`, run `php artisan config:clear` (and `route:cache` if you cache routes), then translate items with **Translate**.
+- Production: `APP_URL` must match the address visitors use (trusted hosts).
 - Custom theme views: replace `route('blog')`, `route('posts.show', $post->slug)`, `route('categories.show', …)` and `url('/')` with `press_route('blog')`, `$post->url()`, `$category->url()` and `press_locale_url('/')`, and add `@include('press.partials.language-switcher')` to your header. Wrap fixed texts in `__()`.
 - The page cache is on when `APP_DEBUG=false`. Run `php artisan press:page-cache clear` after deploying view or theme files, or set `PRESS_PAGE_CACHE=false`.
 - Copy the bundled `plugins/contact-form` and `plugins/seo-sitemap` folders over yours (versions 1.2.0); they upgrade on the next request.

@@ -23,6 +23,9 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->appendToGroup('web', [DetectLocale::class, ApplyTheme::class, CachePublicPages::class]);
         $middleware->alias(['press.plugin' => EnsurePluginIsActive::class]);
+        // Outside local/testing only the APP_URL host (and its subdomains) is answered: no Host-header
+        // poisoning of the page cache or of absolute links in e-mails.
+        $middleware->trustHosts();
     })
     ->withExceptions(function (Exceptions $exceptions) {
         // Old addresses from Content → Redirects (and automatic ones after slug changes) answer instead of a 404.

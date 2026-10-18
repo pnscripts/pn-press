@@ -34,7 +34,8 @@
 
         <div class="press-container max-w-3xl">
             <div class="press-prose py-10 sm:py-14">
-                {!! apply_filters('post.content', $post->body, $post) !!}
+                {{-- Sanitised: an editor's HTML must not run scripts for visitors or admins. Filters may add trusted markup. --}}
+                {!! apply_filters('post.content', \Illuminate\Support\Str::sanitizeHtml((string) $post->body), $post) !!}
             </div>
             @hook('post.after_content', $post)
         </div>
