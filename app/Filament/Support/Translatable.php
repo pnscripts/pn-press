@@ -83,8 +83,10 @@ class Translatable
                 Select::make('target')
                     ->label('Into')
                     ->options(fn (Page|Post|Category $record) => collect($record->missingLocales())->mapWithKeys(fn ($code) => [$code => app(Locales::class)->name($code)])->all())
+                    ->default(fn (Page|Post|Category $record) => $record->missingLocales()[0] ?? null)
                     ->required(),
             ])
+            ->modalSubmitActionLabel('Create draft')
             ->modalDescription('A draft copy in that language is created and linked to this one. Translate its text, then publish it.')
             ->action(function (Page|Post|Category $record, array $data, Action $action) use ($resource) {
                 $copy = self::translate($record, (string) $data['target']);

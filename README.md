@@ -8,6 +8,17 @@ Built with Laravel 13, Filament 5, Livewire 4, Spatie Permission and Tailwind CS
 
 Repository: [github.com/pnscripts/pn-press](https://github.com/pnscripts/pn-press)
 
+## Screenshots
+
+![A tour of PN Scripts Press 1.1: English and Bulgarian site, posts, the Language column, Translate and per-language settings](docs/demo/pn-press-1.1-tour.gif)
+
+| English | Bulgarian (`/bg`) |
+|---|---|
+| ![English home page](docs/demo/front-en-home.png) | ![Bulgarian home page](docs/demo/front-bg-home.png) |
+| ![Admin: pages with languages](docs/demo/admin-pages-languages.png) | ![Bulgarian post](docs/demo/front-bg-post.png) |
+
+More in [docs/demo](docs/demo) (admin dashboard, Translate dialog, menus and settings per language, phone views). All taken from a fresh install with the demo seed.
+
 ## Requirements
 
 - PHP 8.4+ with the `zip`, `pdo_sqlite` (or `pdo_mysql` / `pdo_pgsql`), `mbstring`, `intl` and `fileinfo` extensions
