@@ -3,6 +3,8 @@
 namespace App\Providers\Filament;
 
 use App\Press\Plugins\PluginManager;
+use App\Press\Settings;
+use Filament\Auth\MultiFactor\App\AppAuthentication;
 use Filament\FontProviders\BunnyFontProvider;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -30,6 +32,13 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            // Profile page with two-factor sign-in (authenticator app + recovery codes).
+            // PRESS_REQUIRE_2FA=true makes every admin user set it up before using the panel.
+            ->profile(isSimple: false)
+            ->multiFactorAuthentication(
+                [AppAuthentication::make()->recoverable()->brandName(app(Settings::class)->siteName())],
+                isRequired: (bool) config('press.admin.require_2fa', false),
+            )
             ->brandName('PN Scripts Press')
             ->brandLogo(fn () => view('filament.brand'))
             ->brandLogoHeight('2rem')

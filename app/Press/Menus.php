@@ -4,6 +4,7 @@ namespace App\Press;
 
 use App\Models\Menu;
 use App\Models\MenuItem;
+use App\Press\I18n\Locales;
 use Throwable;
 
 /**
@@ -25,19 +26,28 @@ class Menus
      */
     public function tree(string $location): array
     {
-        if (array_key_exists($location, $this->cache)) {
-            return $this->cache[$location];
+        $locale = app(Locales::class)->current();
+        $key = $location.'|'.$locale;
+
+        if (array_key_exists($key, $this->cache)) {
+            return $this->cache[$key];
         }
 
         try {
-            $menu = Menu::query()->where('location', $location)->with(self::eagerLoads())->first();
+            // The menu made for this language, else the one for every language (locale null).
+            $menu = Menu::query()
+                ->where('location', $location)
+                ->where(fn ($query) => $query->where('locale', $locale)->orWhereNull('locale'))
+                ->orderByRaw('case when locale is null then 1 else 0 end')
+                ->with(self::eagerLoads())
+                ->first();
         } catch (Throwable) {
             return [];
         }
 
         $items = $menu ? $this->map($menu->items, 1) : [];
 
-        return $this->cache[$location] = $this->hooks->applyFilters('menu.items', $items, $location);
+        return $this->cache[$key] = $this->hooks->applyFilters('menu.items', $items, $location);
     }
 
     /** Levels of nesting the site shows (config press.menus.max_depth, 1–6). */

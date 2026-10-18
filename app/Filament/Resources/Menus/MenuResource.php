@@ -7,6 +7,7 @@ use App\Filament\Resources\Menus\Pages\EditMenu;
 use App\Filament\Resources\Menus\Pages\ListMenus;
 use App\Models\Menu;
 use App\Models\MenuItem;
+use App\Press\I18n\Locales;
 use App\Press\Menus;
 use App\Press\Permissions;
 use BackedEnum;
@@ -24,6 +25,7 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rules\Unique;
 use UnitEnum;
 
 class MenuResource extends Resource
@@ -54,8 +56,18 @@ class MenuResource extends Resource
                 TextInput::make('name')->required()->maxLength(80),
                 Select::make('location')
                     ->options(fn () => self::locations())
-                    ->unique(ignoreRecord: true)
+                    ->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule, Get $get) => filled($get('locale'))
+                        ? $rule->where('locale', $get('locale'))
+                        : $rule->whereNull('locale'))
                     ->helperText('Where the theme shows this menu.'),
+                Select::make('locale')
+                    ->label('Language')
+                    ->options(fn () => app(Locales::class)->options())
+                    ->placeholder('Every language')
+                    ->in(fn () => app(Locales::class)->codes())
+                    ->live()
+                    ->visible(fn () => app(Locales::class)->enabled())
+                    ->helperText('A menu for one language replaces the “every language” menu of the same location there.'),
             ]),
             self::itemsRepeater('items', 1)
                 ->label('Items')
@@ -120,6 +132,7 @@ class MenuResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name')->searchable(),
+                TextColumn::make('locale')->label('Language')->badge()->formatStateUsing(fn (?string $state) => strtoupper((string) $state))->placeholder('All')->visible(fn () => app(Locales::class)->enabled()),
                 TextColumn::make('location')->badge()->formatStateUsing(fn (?string $state) => self::locations()[$state] ?? $state)->placeholder('Not shown'),
                 TextColumn::make('items_count')->counts('items')->label('Items'),
             ])

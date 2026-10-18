@@ -8,6 +8,7 @@ use App\Models\Menu;
 use App\Models\Page;
 use App\Models\Plugin;
 use App\Models\User;
+use App\Press\I18n\Locales;
 use App\Press\Plugins\PluginManager;
 use App\Press\Settings;
 use Illuminate\Database\Seeder;
@@ -84,13 +85,13 @@ class DemoSite extends Seeder
             $settings->set('reading.home_page_id', $home->id);
         }
 
-        if (! Menu::query()->where('location', 'primary')->exists()) {
+        if (! Menu::query()->where('location', 'primary')->whereNull('locale')->exists()) {
             $menu = Menu::query()->create(['name' => 'Main menu', 'location' => 'primary']);
             $menu->items()->create(['label' => 'Home', 'type' => 'url', 'url' => '/', 'sort_order' => 1]);
             $journal = $menu->items()->create(['label' => 'Journal', 'type' => 'blog', 'sort_order' => 2]);
 
             // A dropdown with a sub-menu: Journal › categories › the newest post of the first one.
-            Category::query()->orderBy('name')->get()->each(function (Category $category, int $index) use ($journal) {
+            Category::query()->inLocale(app(Locales::class)->default())->orderBy('name')->get()->each(function (Category $category, int $index) use ($journal) {
                 $item = $journal->children()->create(['label' => $category->name, 'type' => 'category', 'category_id' => $category->id, 'sort_order' => $index + 1]);
 
                 if ($index === 0 && ($post = $category->posts()->published()->latest('published_at')->first())) {
@@ -102,12 +103,14 @@ class DemoSite extends Seeder
             $menu->items()->create(['label' => 'Contact', 'type' => 'page', 'page_id' => $contact->id, 'sort_order' => 4]);
         }
 
-        if (! Menu::query()->where('location', 'footer')->exists()) {
+        if (! Menu::query()->where('location', 'footer')->whereNull('locale')->exists()) {
             $menu = Menu::query()->create(['name' => 'Footer', 'location' => 'footer']);
             $menu->items()->create(['label' => 'About', 'type' => 'page', 'page_id' => $about->id, 'sort_order' => 1]);
             $menu->items()->create(['label' => 'Contact', 'type' => 'page', 'page_id' => $contact->id, 'sort_order' => 2]);
             $menu->items()->create(['label' => 'Sitemap', 'type' => 'url', 'url' => '/sitemap.xml', 'sort_order' => 3]);
         }
+
+        $this->call(DemoSiteBulgarian::class);
     }
 
     /**
@@ -115,7 +118,7 @@ class DemoSite extends Seeder
      */
     private function page(string $slug, string $title, ?int $author, string $template, array $blocks, ?string $excerpt = null): Page
     {
-        return Page::query()->firstOrCreate(['slug' => $slug, 'parent_id' => null], [
+        return Page::query()->firstOrCreate(['slug' => $slug, 'parent_id' => null, 'locale' => app(Locales::class)->default()], [
             'title' => $title,
             'user_id' => $author,
             'template' => $template,

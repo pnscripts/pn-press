@@ -27,3 +27,6 @@ jobs:
 
       - name: Run tests
         run: php artisan test
+
+      - name: Static analysis (Larastan)
+        run: composer analyse

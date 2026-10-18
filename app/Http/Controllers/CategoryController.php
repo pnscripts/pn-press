@@ -3,14 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Press\I18n\Locales;
 
 class CategoryController extends Controller
 {
-    public function show(string $slug)
+    public function show(Locales $locales, string $slug)
     {
         $category = Category::query()
+            ->inLocale()
             ->where('slug', $slug)
             ->firstOrFail();
+
+        $locales->setAlternates($category->alternateUrls() + [$category->locale => $category->url()]);
 
         $posts = $category->posts()
             ->published()

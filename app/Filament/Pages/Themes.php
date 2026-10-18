@@ -7,6 +7,7 @@ use App\Press\Packages\InvalidPackage;
 use App\Press\Permissions;
 use App\Press\Themes\ThemeManager;
 use App\Press\Themes\ThemeManifest;
+use App\Press\Updates\UpdateChecker;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\ColorPicker;
@@ -75,12 +76,13 @@ class Themes extends Page implements HasTable
                 ->map(fn (ThemeManifest $theme) => [
                     'key' => $theme->slug,
                     'name' => $theme->name,
-                    'description' => $theme->description,
+                    'description' => trim(($theme->parent ? 'Child theme of '.($this->manager()->parentOf($theme)?->name ?? $theme->parent).'. ' : '').($this->manager()->problem($theme) ?? '').' '.$theme->description),
                     'version' => $theme->version,
                     'author' => $theme->author,
                     'screenshot' => $theme->screenshot ? $this->manager()->assetUrl($theme->screenshot, $theme) : null,
                     'active' => $theme->slug === $active,
-                    'has_settings' => $theme->settings !== [],
+                    'has_settings' => $this->manager()->fields($theme) !== [],
+                    'update' => app(UpdateChecker::class)->for('theme:'.$theme->slug),
                 ])
                 ->sortByDesc('active')
                 ->all())
@@ -88,6 +90,13 @@ class Themes extends Page implements HasTable
                 ImageColumn::make('screenshot')->label('')->imageWidth(160)->imageHeight(100),
                 TextColumn::make('name')->weight('semibold')->description(fn (array $record) => $record['description'])->wrap(),
                 TextColumn::make('version')->badge()->color('gray'),
+                TextColumn::make('update')
+                    ->label('Update')
+                    ->badge()
+                    ->color('warning')
+                    ->state(fn (array $record) => $record['update'] ? $record['update']['version'].' available' : null)
+                    ->url(fn (array $record) => $record['update']['url'] ?? null, shouldOpenInNewTab: true)
+                    ->placeholder('—'),
                 TextColumn::make('active')
                     ->label('Status')
                     ->badge()
@@ -127,7 +136,7 @@ class Themes extends Page implements HasTable
     /** @return array<int, mixed> */
     private function settingsFields(?ThemeManifest $theme): array
     {
-        return collect($theme?->settings ?? [])->map(fn (array $field) => match ($field['type']) {
+        return collect($theme ? $this->manager()->fields($theme) : [])->map(fn (array $field) => match ($field['type']) {
             'color' => ColorPicker::make($field['key'])->label($field['label'])->regex('/^#[0-9a-fA-F]{3}([0-9a-fA-F]{3})?$/'),
             'select' => Select::make($field['key'])->label($field['label'])->options($field['options'])->selectablePlaceholder(false),
             'toggle' => Toggle::make($field['key'])->label($field['label']),

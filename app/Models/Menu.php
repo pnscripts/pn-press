@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Menu extends Model
 {
-    protected $fillable = ['name', 'location'];
+    protected $fillable = ['name', 'location', 'locale'];
 
     /** Top-level items; children hang off MenuItem::children(). */
     public function items(): HasMany

@@ -14,7 +14,8 @@ use App\Press\Packages\Manifest;
  *       "version": "1.0.0",
  *       "description": "…",
  *       "author": "…",
- *       "requires": { "press": ">=1.0" },
+ *       "requires": { "press": ">=1.0", "php": ">=8.3", "extensions": ["intl"], "plugins": { "seo-sitemap": ">=1.1" } },
+ *       "update_url": "https://example.com/contact-form/latest.json",
  *       "provider": "PnPress\\ContactForm\\ContactFormServiceProvider",
  *       "autoload": { "psr-4": { "PnPress\\ContactForm\\": "src/" } },
  *       "migrations": "database/migrations",
@@ -41,6 +42,9 @@ class PluginManifest extends Manifest
     public readonly string $routes;
 
     public readonly ?string $admin;
+
+    /** @var array<string, string> plugin slug => version constraint */
+    public readonly array $requiresPlugins;
 
     public function __construct(string $path, array $data)
     {
@@ -75,6 +79,18 @@ class PluginManifest extends Manifest
         $this->views = $this->relativePath($data['views'] ?? null, 'resources/views');
         $this->routes = $this->relativePath($data['routes'] ?? null, 'routes/web.php');
         $this->admin = $admin;
+
+        $plugins = $data['requires']['plugins'] ?? [];
+        if (! is_array($plugins) || (array_is_list($plugins) && $plugins !== [])) {
+            throw new InvalidPackage('"requires.plugins" must map plugin slugs to versions, like {"seo-sitemap": ">=1.0"}.');
+        }
+        foreach ($plugins as $dependency => $constraint) {
+            if (! is_string($dependency) || ! preg_match(self::SLUG_PATTERN, $dependency) || $dependency === $this->slug
+                || ! is_string($constraint) || ($constraint !== '*' && ! preg_match(self::CONSTRAINT_PATTERN, $constraint))) {
+                throw new InvalidPackage('"requires.plugins" must map other plugin slugs to versions like ">=1.0" or "*".');
+            }
+        }
+        $this->requiresPlugins = $plugins;
     }
 
     public static function filename(): string

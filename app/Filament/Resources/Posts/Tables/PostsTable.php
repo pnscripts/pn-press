@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\Posts\Tables;
 
 use App\Enums\PostStatus;
+use App\Filament\Resources\Posts\PostResource;
+use App\Filament\Support\Translatable;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -21,6 +23,7 @@ class PostsTable
                     ->searchable()
                     ->sortable()
                     ->limit(50),
+                Translatable::column(),
                 TextColumn::make('category.name')
                     ->placeholder('—')
                     ->sortable(),
@@ -50,10 +53,12 @@ class PostsTable
                         PostStatus::Draft->value => 'Draft',
                         PostStatus::Published->value => 'Published',
                     ]),
+                Translatable::filter(),
                 SelectFilter::make('category')
                     ->relationship('category', 'name'),
             ])
             ->recordActions([
+                Translatable::action(PostResource::class),
                 EditAction::make(),
                 DeleteAction::make(),
             ])

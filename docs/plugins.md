@@ -22,7 +22,8 @@ my-plugin/
     "version": "1.0.0",
     "description": "One sentence about what it does.",
     "author": "You",
-    "requires": { "press": ">=1.0" },
+    "requires": { "press": ">=1.0", "php": ">=8.3", "extensions": ["intl"], "plugins": { "seo-sitemap": ">=1.1" } },
+    "update_url": "https://example.com/my-plugin/latest.json",
     "provider": "Acme\\MyPlugin\\MyPluginServiceProvider",
     "autoload": { "psr-4": { "Acme\\MyPlugin\\": "src/" } },
     "migrations": "database/migrations",
@@ -38,6 +39,10 @@ my-plugin/
 | `name` | up to 80 characters |
 | `version` | `1.0`, `1.0.0`, `1.0.0-beta.1` |
 | `requires.press` | `>=1.0`, `>1.0`, `^1.0` or `~1.0`; activation is refused when it does not match |
+| `requires.php` | the PHP version the plugin needs, same syntax (`>=8.4`). Optional |
+| `requires.extensions` | PHP extensions that must be loaded, e.g. `["gd", "intl"]`. Optional |
+| `requires.plugins` | other plugins this one needs: `{ "slug": ">=1.2" }` (or `"*"` for any version). They must be installed, active and new enough before this one can be activated. Optional |
+| `update_url` | an `https://` URL of a small JSON file announcing your latest version (see *Update notices*). Optional |
 | `provider` | a Laravel `ServiceProvider` class; optional |
 | `autoload.psr-4` | namespace prefix (ending in `\\`) to a folder inside the plugin. `App\`, `Illuminate\`, `Filament\`, `Livewire\`, `Database\`, `Tests\` and `Spatie\` are refused |
 | `migrations`, `views` | folders inside the plugin; paths with `..` are refused |
@@ -56,6 +61,30 @@ No Composer step is needed: PN Scripts Press autoloads the namespace itself.
 | Update | Replace the folder (upload with *Replace*, or `install --replace`). On the next request a changed `version` runs the new migrations once. | `plugin.upgraded` |
 | Deactivate | The plugin stops loading. Its tables and settings stay. | `plugin.deactivated` |
 | Uninstall | Deactivate, roll back its migrations (data is lost), delete settings `plugin.<slug>.*` and the folder. | `plugin.uninstalling` |
+
+### Dependencies
+
+When a plugin lists `requires.plugins`:
+
+- **Activate** is refused, with the reason, until every required plugin is installed, active and matches the version (e.g. "Payments needs the plugin Forms >=1.2 (installed: 1.0.0)").
+- **Deactivate** and **Uninstall** of a required plugin are refused while a plugin that needs it is active (or, for uninstall, installed). Switch the dependent off first.
+- **Boot order:** required plugins load before the plugins that need them, so their classes and hooks exist.
+- If a required plugin disappears behind the admin's back (its folder deleted over SSH), the dependent plugin is **skipped**, not crashed, and the reason is shown on the Plugins screen.
+
+The same `requires.php` and `requires.extensions` checks apply to themes.
+
+### Update notices
+
+PN Scripts Press never downloads or installs code. It can tell you that a newer version exists:
+
+- The core checks its latest GitHub release (`PRESS_UPDATE_URL` changes the address).
+- A plugin or theme with `update_url` is checked at that address. The file answers:
+
+```json
+{ "version": "1.2.0", "url": "https://example.com/my-plugin/changelog" }
+```
+
+`php artisan press:check-updates` runs once a day through the Laravel scheduler (`* * * * * php artisan schedule:run` in cron) and can be run by hand. Only `https://` addresses are used, redirects are not followed, answers over 64 KB, pre-releases and anything that is not a version number are ignored, and no site data is sent. Updates show as badges on the Plugins and Themes screens and a count next to *Plugins* in the menu. Install the update as usual (upload the new zip with *Replace*). `PRESS_UPDATE_CHECKS=false` turns the checks off.
 
 From the command line:
 

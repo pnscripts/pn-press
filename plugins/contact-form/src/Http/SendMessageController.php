@@ -2,6 +2,7 @@
 
 namespace PnPress\ContactForm\Http;
 
+use App\Press\I18n\Locales;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -11,6 +12,12 @@ class SendMessageController
 {
     public function __invoke(Request $request): RedirectResponse
     {
+        // Errors in the language of the page the form was sent from (a hidden field; only configured languages count).
+        $locales = app(Locales::class);
+        if ($locales->isSupported(is_string($request->input('locale')) ? $request->input('locale') : null)) {
+            $locales->activate($request->input('locale'));
+        }
+
         // Honeypot: real people leave the hidden "website" field empty.
         if (filled($request->input('website'))) {
             return back()->with('contact-form.sent', true);

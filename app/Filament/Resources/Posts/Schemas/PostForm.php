@@ -3,12 +3,14 @@
 namespace App\Filament\Resources\Posts\Schemas;
 
 use App\Enums\PostStatus;
+use App\Filament\Support\Translatable;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
@@ -19,6 +21,7 @@ class PostForm
     {
         return $schema
             ->components([
+                Translatable::localeField(),
                 TextInput::make('title')
                     ->required()
                     ->maxLength(255)
@@ -31,9 +34,9 @@ class PostForm
                 TextInput::make('slug')
                     ->required()
                     ->maxLength(255)
-                    ->unique(ignoreRecord: true),
+                    ->unique(ignoreRecord: true, modifyRuleUsing: Translatable::uniquePerLocale()),
                 Select::make('category_id')
-                    ->relationship('category', 'name')
+                    ->relationship('category', 'name', fn ($query, Get $get) => $query->where('locale', Translatable::formLocale($get)))
                     ->searchable()
                     ->preload()
                     ->nullable(),

@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Categories\Tables;
 
+use App\Filament\Resources\Categories\CategoryResource;
+use App\Filament\Support\Translatable;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -18,6 +20,7 @@ class CategoriesTable
                 TextColumn::make('name')
                     ->searchable()
                     ->sortable(),
+                Translatable::column(),
                 TextColumn::make('slug')
                     ->searchable()
                     ->sortable(),
@@ -30,7 +33,9 @@ class CategoriesTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->filters([Translatable::filter()])
             ->recordActions([
+                Translatable::action(CategoryResource::class),
                 EditAction::make(),
                 DeleteAction::make(),
             ])

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 
 class Media extends Model
 {
@@ -24,6 +25,15 @@ class Media extends Model
     {
         $storage = Storage::disk($disk);
         $mime = $storage->mimeType($path) ?: null;
+
+        // SVG files are served from this site's own address, so one with scripts could act as a signed-in admin.
+        if (in_array($mime, ['image/svg+xml', 'text/xml', 'application/xml'], true) || str_ends_with(strtolower($path), '.svg')) {
+            if (! self::isSafeSvg((string) $storage->get($path))) {
+                $storage->delete($path);
+
+                throw ValidationException::withMessages(['data.path' => 'This SVG contains scripts, event handlers, external references or embedded documents and was not saved.']);
+            }
+        }
         $data = $attributes + [
             'disk' => $disk,
             'path' => $path,
@@ -41,6 +51,24 @@ class Media extends Model
         }
 
         return static::query()->create($data);
+    }
+
+    /** True for a plain drawing: no scripts, handlers, javascript: links, foreign HTML, entities or external references. */
+    public static function isSafeSvg(string $svg): bool
+    {
+        $patterns = [
+            '/<\s*script/i', '/<\s*foreignObject/i', '/<\s*(iframe|embed|object|link|meta|style[^>]*>[^<]*@import)/i',
+            '/\son[a-z]+\s*=/i', '/(javascript|vbscript)\s*:/i', '/<!\s*(ENTITY|DOCTYPE)/i',
+            '/(xlink:)?href\s*=\s*["\']\s*(?!#|data:image\/(png|jpe?g|gif|webp);)/i', '/data:\s*text\/html/i',
+        ];
+
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $svg)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public function uploader(): BelongsTo

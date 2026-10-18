@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Enums\PostStatus;
+use App\Models\Concerns\HasTranslations;
+use App\Press\I18n\Locales;
 use App\Press\Settings;
 use Database\Factories\PageFactory;
 use Illuminate\Database\Eloquent\Builder;
@@ -10,6 +12,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
@@ -17,18 +20,32 @@ use Illuminate\Support\Str;
  * A CMS page built from blocks (see App\Press\Blocks\BlockRegistry).
  *
  * Every save that changes content keeps the previous version as a PageRevision.
+ *
+ * @property int $id
+ * @property int|null $parent_id
+ * @property string $title
+ * @property string $slug
+ * @property string $path
+ * @property string $template
+ * @property array<int, array<string, mixed>>|null $blocks
+ * @property PostStatus $status
+ * @property Carbon|null $published_at
+ * @property string $locale
+ * @property string|null $translation_group
  */
 class Page extends Model
 {
     /** @use HasFactory<PageFactory> */
     use HasFactory;
 
+    use HasTranslations;
+
     /** Fields copied into a revision and restored from it. */
     public const REVISIONED = ['title', 'slug', 'parent_id', 'template', 'blocks', 'excerpt', 'status', 'published_at', 'meta_title', 'meta_description', 'og_image', 'noindex'];
 
     protected $fillable = [
         'parent_id', 'user_id', 'title', 'slug', 'template', 'blocks', 'excerpt', 'status', 'published_at',
-        'meta_title', 'meta_description', 'og_image', 'noindex', 'sort_order',
+        'meta_title', 'meta_description', 'og_image', 'noindex', 'sort_order', 'locale', 'translation_group',
     ];
 
     public bool $skipRevision = false;
@@ -77,6 +94,12 @@ class Page extends Model
         });
 
         static::saved(function (Page $page): void {
+            // A public page that moved keeps answering at its old address.
+            if ($page->wasChanged('path') && $page->getOriginal('status') === PostStatus::Published) {
+                $locales = app(Locales::class);
+                Redirect::moved($locales->path((string) $page->getOriginal('path'), $page->locale), $locales->path($page->path, $page->locale));
+            }
+
             if ($page->wasChanged('path')) {
                 // Children carry the parent's path; re-save them so their paths follow.
                 $page->children()->get()->each(function (Page $child): void {
@@ -87,11 +110,13 @@ class Page extends Model
         });
     }
 
+    /** @return BelongsTo<Page, $this> */
     public function parent(): BelongsTo
     {
         return $this->belongsTo(Page::class, 'parent_id');
     }
 
+    /** @return HasMany<Page, $this> */
     public function children(): HasMany
     {
         return $this->hasMany(Page::class, 'parent_id')->orderBy('sort_order');
@@ -121,14 +146,20 @@ class Page extends Model
             && $this->published_at->lte(now());
     }
 
+    /** The home page of its language (Settings → Reading, per language). */
     public function isHome(): bool
     {
-        return (int) app(Settings::class)->get('reading.home_page_id') === (int) $this->getKey();
+        return (int) app(Settings::class)->localized('reading.home_page_id', $this->locale) === (int) $this->getKey();
     }
 
     public function url(): string
     {
-        return $this->isHome() ? url('/') : url($this->path);
+        return app(Locales::class)->url($this->isHome() ? '/' : $this->path, $this->locale);
+    }
+
+    public function isPubliclyVisible(): bool
+    {
+        return $this->isPublic();
     }
 
     public function metaTitle(): string

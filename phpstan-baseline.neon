@@ -1,0 +1,115 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Strict comparison using \!\=\= between non\-empty\-array\<mixed, mixed\> and array\{\} will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: app/Filament/Pages/SiteSettings.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Filament/Pages/Themes.php
+
+		-
+			message: '#^Property App\\Filament\\Widgets\\DraftsAwaitingReview\:\:\$columnSpan \(array\<string, int\|null\>\|int\|string\) does not accept default value of type array\<string, int\|string\>\.$#'
+			identifier: property.defaultValue
+			count: 1
+			path: app/Filament/Widgets/DraftsAwaitingReview.php
+
+		-
+			message: '#^Parameter \#1 \$chart of method Filament\\Widgets\\StatsOverviewWidget\\Stat\:\:chart\(\) expects array\<float\>\|Illuminate\\Contracts\\Support\\Arrayable\|null, list\<int\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Filament/Widgets/PostStatsOverview.php
+
+		-
+			message: '#^Property App\\Filament\\Widgets\\PostsByCategoryChart\:\:\$columnSpan \(array\<string, int\|null\>\|int\|string\) does not accept default value of type array\<string, int\|string\>\.$#'
+			identifier: property.defaultValue
+			count: 1
+			path: app/Filament/Widgets/PostsByCategoryChart.php
+
+		-
+			message: '#^Call to function method_exists\(\) with App\\Models\\User and ''canAccessPanel'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/Http/Controllers/PageController.php
+
+		-
+			message: '#^Parameter \#1 \$attributes of method Illuminate\\Database\\Eloquent\\Model\:\:fill\(\) expects array\<string, mixed\>, array\<int, string\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Models/Page.php
+
+		-
+			message: '#^Parameter \#1 \$keys of method Illuminate\\Support\\Collection\<int,string\>\:\:only\(\) expects array\<0\>\|Illuminate\\Support\\Enumerable\<\(int\|string\), 0\>\|string\|null, array\{''title'', ''slug'', ''parent_id'', ''template'', ''blocks'', ''excerpt'', ''status'', ''published_at'', \.\.\.\} given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Models/Page.php
+
+		-
+			message: '#^Parameter \#1 \$value of function collect expects Illuminate\\Contracts\\Support\\Arrayable\<\(int\|string\), mixed\>\|iterable\<\(int\|string\), mixed\>\|null, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Models/Page.php
+
+		-
+			message: '#^Parameter \#1 \$items of method App\\Press\\Menus\:\:map\(\) expects iterable\<App\\Models\\MenuItem\>, Illuminate\\Database\\Eloquent\\Collection\<int, Illuminate\\Database\\Eloquent\\Model\> given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/Press/Menus.php
+
+		-
+			message: '#^Unsafe usage of new static\(\)\.$#'
+			identifier: new.static
+			count: 1
+			path: app/Press/Packages/Manifest.php
+
+		-
+			message: '#^Call to function method_exists\(\) with Illuminate\\Routing\\RouteCollectionInterface and ''refreshNameLookups'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/Press/Plugins/PluginManager.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\View\\ViewFinderInterface\:\:getPaths\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Press/Themes/ThemeManager.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\View\\ViewFinderInterface\:\:setPaths\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Press/Themes/ThemeManager.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>slug" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Press/Themes/ThemeManager.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Support\\HigherOrderCollectionProxy\<string, Illuminate\\Database\\Eloquent\\Model, Illuminate\\Database\\Eloquent\\Collection\>\:\:markHandled\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: plugins/contact-form/src/Filament/ContactMessageResource.php
+
+		-
+			message: '#^Parameter \#1 \$messages of static method PnPress\\ContactForm\\MessagesCsv\:\:download\(\) expects iterable\<PnPress\\ContactForm\\ContactMessage\>, Illuminate\\Database\\Eloquent\\Collection given\.$#'
+			identifier: argument.type
+			count: 1
+			path: plugins/contact-form/src/Filament/ContactMessageResource.php
+
+		-
+			message: '#^Parameter \#1 \$messages of static method PnPress\\ContactForm\\MessagesCsv\:\:download\(\) expects iterable\<PnPress\\ContactForm\\ContactMessage\>, Illuminate\\Support\\LazyCollection\<int, Illuminate\\Database\\Eloquent\\Model\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: plugins/contact-form/src/Filament/Pages/ListContactMessages.php
+
+		-
+			message: '#^Access to an undefined property PnPress\\ContactForm\\ContactMessage\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: plugins/contact-form/src/MessagesCsv.php

@@ -42,6 +42,9 @@ class PluginManager
     /** @var array<string, true> */
     private array $loaded = [];
 
+    /** @var array<string, string> */
+    private array $bootProblems = [];
+
     /** @var array<string, bool>|null */
     private ?array $states = null;
 
@@ -119,8 +122,11 @@ class PluginManager
     /** Load every active plugin. Called once the application has booted. */
     public function bootActive(): void
     {
-        foreach ($this->states() as $slug => $enabled) {
-            if (! $enabled || ! ($manifest = $this->find($slug))) {
+        foreach ($this->bootOrder() as $manifest) {
+            // A dependency that was removed or switched off behind the admin's back: skip, don't crash.
+            if ($unmet = $this->unmetRequirements($manifest)) {
+                $this->bootProblems[$manifest->slug] = 'Not loaded: needs '.implode('; ', $unmet).'.';
+
                 continue;
             }
 
@@ -134,12 +140,104 @@ class PluginManager
         }
     }
 
+    /**
+     * Active plugins with their dependencies first.
+     *
+     * @return list<PluginManifest>
+     */
+    public function bootOrder(): array
+    {
+        $ordered = [];
+        $visit = function (string $slug, array $path) use (&$visit, &$ordered): void {
+            $manifest = $this->find($slug);
+            if (! $manifest || isset($ordered[$slug]) || isset($path[$slug]) || ! $this->isActive($slug)) {
+                return;
+            }
+
+            foreach (array_keys($manifest->requiresPlugins) as $dependency) {
+                $visit($dependency, $path + [$slug => true]);
+            }
+
+            $ordered[$slug] = $manifest;
+        };
+
+        foreach ($this->states() as $slug => $enabled) {
+            if ($enabled) {
+                $visit($slug, []);
+            }
+        }
+
+        return array_values($ordered);
+    }
+
+    /**
+     * What this plugin needs that is missing: server requirements and other plugins (installed, active, right version).
+     *
+     * @return list<string>
+     */
+    public function unmetRequirements(PluginManifest $manifest): array
+    {
+        $unmet = $manifest->unmetPlatformRequirements((string) config('press.version'));
+
+        foreach ($manifest->requiresPlugins as $slug => $constraint) {
+            $required = $this->find($slug);
+            $label = ($required->name ?? $slug).($constraint === '*' ? '' : " {$constraint}");
+
+            if ($required === null) {
+                $unmet[] = "the plugin {$label} (not installed)";
+            } elseif (! PluginManifest::satisfies($required->version, $constraint)) {
+                $unmet[] = "the plugin {$label} (installed: {$required->version})";
+            } elseif (! $this->isActive($slug)) {
+                $unmet[] = "the plugin {$label} to be active";
+            }
+        }
+
+        return $unmet;
+    }
+
+    /**
+     * Installed plugins that list this one in requires.plugins.
+     *
+     * @return list<PluginManifest>
+     */
+    public function dependents(string $slug): array
+    {
+        return array_values(array_filter($this->all(), fn (PluginManifest $plugin) => array_key_exists($slug, $plugin->requiresPlugins)));
+    }
+
+    /** @return list<PluginManifest> */
+    public function activeDependents(string $slug): array
+    {
+        return array_values(array_filter($this->dependents($slug), fn (PluginManifest $plugin) => $this->isActive($plugin->slug)));
+    }
+
+    /**
+     * Active plugins that were skipped at boot, with the reason.
+     *
+     * @return array<string, string>
+     */
+    public function bootProblems(): array
+    {
+        return $this->bootProblems;
+    }
+
     public function activate(string $slug): PluginManifest
     {
         $manifest = $this->find($slug) ?? throw new InvalidPackage("Plugin \"{$slug}\" is not installed.");
 
         if (! $manifest->isCompatible((string) config('press.version'))) {
             throw new InvalidPackage("{$manifest->name} needs PN Scripts Press {$manifest->requiresPress}.");
+        }
+
+        if ($unmet = $this->unmetRequirements($manifest)) {
+            throw new InvalidPackage("{$manifest->name} needs ".implode('; ', $unmet).'.');
+        }
+
+        // Dependencies load first, so their classes and hooks exist when this plugin boots.
+        foreach (array_keys($manifest->requiresPlugins) as $dependency) {
+            if (($required = $this->find($dependency)) && ! $this->isLoaded($dependency)) {
+                $this->load($required);
+            }
         }
 
         $this->load($manifest);
@@ -163,6 +261,10 @@ class PluginManager
     {
         $manifest = $this->find($slug);
 
+        if ($dependents = $this->activeDependents($slug)) {
+            throw new InvalidPackage(($manifest->name ?? $slug).' is needed by '.implode(', ', array_map(fn (PluginManifest $p) => $p->name, $dependents)).'. Deactivate those first.');
+        }
+
         Plugin::query()->where('slug', $slug)->update(['enabled' => false]);
         $this->states = null;
         $this->forgetRouteCache();
@@ -178,6 +280,10 @@ class PluginManager
     public function uninstall(string $slug): void
     {
         $manifest = $this->find($slug) ?? throw new InvalidPackage("Plugin \"{$slug}\" is not installed.");
+
+        if ($dependents = $this->dependents($slug)) {
+            throw new InvalidPackage("{$manifest->name} is needed by ".implode(', ', array_map(fn (PluginManifest $p) => $p->name, $dependents)).'. Uninstall those first.');
+        }
 
         if ($this->isActive($slug)) {
             $this->deactivate($slug);
@@ -205,6 +311,7 @@ class PluginManager
         /** @var PluginManifest $manifest */
         $manifest = $this->installer->installZip($zipPath, 'plugin', PluginManifest::class, $this->path(), $replace);
         $this->manifests = null;
+        $this->hooks->doAction('plugin.installed', $manifest);
 
         return $manifest;
     }
@@ -214,6 +321,7 @@ class PluginManager
         /** @var PluginManifest $manifest */
         $manifest = $this->installer->installDirectory($directory, 'plugin', PluginManifest::class, $this->path(), $replace);
         $this->manifests = null;
+        $this->hooks->doAction('plugin.installed', $manifest);
 
         return $manifest;
     }

@@ -156,8 +156,11 @@ class CmsTest extends TestCase
 
         // Re-seeding changes nothing.
         $this->seed(DatabaseSeeder::class);
-        $this->assertSame(3, Page::query()->count());
-        $this->assertSame(2, Menu::query()->count());
+        $this->assertSame(3, Page::query()->where('locale', 'en')->count());
+        $this->assertSame(2, Menu::query()->whereNull('locale')->count());
+        // Bulgarian demo (PRESS_LOCALES=en,bg): three linked pages and two menus of its own.
+        $this->assertSame(3, Page::query()->where('locale', 'bg')->whereNotNull('translation_group')->count());
+        $this->assertSame(2, Menu::query()->where('locale', 'bg')->count());
     }
 
     public function test_the_contact_form_plugin_stores_messages(): void

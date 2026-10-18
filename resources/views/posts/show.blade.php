@@ -9,10 +9,10 @@
 @section('content')
     <article>
         <header class="press-container max-w-3xl pt-10 sm:pt-16">
-            <a href="{{ route('blog') }}" class="text-sm font-medium text-muted hover:text-ink">&larr; Journal</a>
+            <a href="{{ press_route('blog') }}" class="text-sm font-medium text-muted hover:text-ink">&larr; {{ __('Journal') }}</a>
             @if ($post->category)
                 <p class="mt-8">
-                    <a href="{{ route('categories.show', $post->category->slug) }}" class="press-eyebrow hover:underline">{{ $post->category->name }}</a>
+                    <a href="{{ $post->category->url() }}" class="press-eyebrow hover:underline">{{ $post->category->name }}</a>
                 </p>
             @endif
             <h1 class="mt-3 font-display text-4xl font-semibold leading-[1.1] tracking-tight sm:text-6xl">{{ $post->title }}</h1>
@@ -21,8 +21,8 @@
                 @if ($post->author)
                     <span class="font-semibold text-ink">{{ $post->author->name }}</span>
                 @endif
-                <time datetime="{{ $post->published_at?->toDateString() }}">{{ $post->published_at?->format('j F Y') }}</time>
-                <span>{{ $post->readingTimeMinutes() }} min read</span>
+                <time datetime="{{ $post->published_at?->toDateString() }}">{{ $post->published_at?->translatedFormat('j F Y') }}</time>
+                <span>{{ __(':count min read', ['count' => $post->readingTimeMinutes()]) }}</span>
             </p>
         </header>
 
@@ -34,7 +34,8 @@
 
         <div class="press-container max-w-3xl">
             <div class="press-prose py-10 sm:py-14">
-                {!! apply_filters('post.content', $post->body, $post) !!}
+                {{-- Sanitised: an editor's HTML must not run scripts for visitors or admins. Filters may add trusted markup. --}}
+                {!! apply_filters('post.content', \Illuminate\Support\Str::sanitizeHtml((string) $post->body), $post) !!}
             </div>
             @hook('post.after_content', $post)
         </div>
@@ -43,7 +44,7 @@
     @if ($related->isNotEmpty())
         <section aria-labelledby="related-heading" class="press-container border-t-2 border-ink pt-8">
             <h2 id="related-heading" class="font-display text-3xl font-semibold tracking-tight">
-                More {{ $post->category ? 'in '.$post->category->name : 'writing' }}
+                {{ $post->category ? __('More in :name', ['name' => $post->category->name]) : __('More writing') }}
             </h2>
             <div class="mt-4 divide-y divide-rule">
                 @foreach ($related as $item)

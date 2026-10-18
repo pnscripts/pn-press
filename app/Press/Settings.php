@@ -3,6 +3,7 @@
 namespace App\Press;
 
 use App\Models\Setting;
+use App\Press\I18n\Locales;
 use Illuminate\Support\Arr;
 use Throwable;
 
@@ -29,6 +30,7 @@ class Settings
         Setting::query()->updateOrCreate(['key' => $key], ['value' => $value]);
 
         $this->values = null;
+        $this->changed();
     }
 
     /**
@@ -41,6 +43,7 @@ class Settings
         }
 
         $this->values = null;
+        $this->changed();
     }
 
     public function forget(string $key): void
@@ -48,6 +51,7 @@ class Settings
         Setting::query()->where('key', $key)->delete();
 
         $this->values = null;
+        $this->changed();
     }
 
     /** Forget a key and every key below it ("plugin.contact-form" and "plugin.contact-form.*"). */
@@ -56,6 +60,7 @@ class Settings
         Setting::query()->where('key', $key)->orWhere('key', 'like', $key.'.%')->delete();
 
         $this->values = null;
+        $this->changed();
     }
 
     /**
@@ -90,6 +95,27 @@ class Settings
             ->all();
     }
 
+    /**
+     * A setting in a language: "site.name" in Bulgarian is stored as "site.i18n.bg.name" and falls back
+     * to "site.name" when empty. The default language always reads the plain key.
+     */
+    public function localized(string $key, ?string $locale = null, mixed $default = null): mixed
+    {
+        $locales = app(Locales::class);
+        $locale ??= $locales->current();
+
+        if ($locale !== $locales->default() && str_contains($key, '.')) {
+            [$group, $rest] = explode('.', $key, 2);
+            $value = $this->get($group.'.i18n.'.$locale.'.'.$rest);
+
+            if ($value !== null && $value !== '') {
+                return $value;
+            }
+        }
+
+        return $this->get($key, $default);
+    }
+
     /** The product name a fresh install shows until Settings › Site name is filled in. */
     public const DEFAULT_SITE_NAME = 'PN Scripts Press';
 
@@ -101,7 +127,7 @@ class Settings
      */
     public function siteName(): string
     {
-        $name = trim((string) $this->get('site.name', ''));
+        $name = trim((string) $this->localized('site.name', null, ''));
 
         if ($name !== '') {
             return $name;
@@ -110,6 +136,12 @@ class Settings
         $appName = trim((string) config('app.name'));
 
         return $appName !== '' && ! in_array($appName, self::STOCK_APP_NAMES, true) ? $appName : self::DEFAULT_SITE_NAME;
+    }
+
+    /** Tells listeners (the page cache) that a setting changed. */
+    private function changed(): void
+    {
+        app(Hooks::class)->doAction('settings.changed');
     }
 
     public function flush(): void

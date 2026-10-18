@@ -2,7 +2,8 @@
     $press = app(\App\Press\Settings::class);
     $themes = app(\App\Press\Themes\ThemeManager::class);
     $siteName = $press->siteName();
-    $tagline = (string) $press->get('site.tagline', 'Stories, notes and pages');
+    $tagline = (string) $press->localized('site.tagline', null, __('Stories, notes and pages'));
+    $locales = app(\App\Press\I18n\Locales::class);
     $pageTitle = trim($__env->yieldContent('title'));
     $fullTitle = $pageTitle !== '' && $pageTitle !== $siteName ? $pageTitle.' · '.$siteName : $siteName;
     $description = trim($__env->yieldContent('description')) ?: $tagline;
@@ -16,6 +17,14 @@
         <title>{{ $fullTitle }}</title>
         <meta name="description" content="{{ \Illuminate\Support\Str::limit(strip_tags($description), 300) }}">
         <link rel="canonical" href="{{ trim($__env->yieldContent('canonical')) ?: url()->current() }}">
+        @if ($locales->enabled() && count($alternates = $locales->alternates()) > 1)
+            @foreach ($alternates as $code => $href)
+                <link rel="alternate" hreflang="{{ $code }}" href="{{ $href }}">
+            @endforeach
+            @isset($alternates[$locales->default()])
+                <link rel="alternate" hreflang="x-default" href="{{ $alternates[$locales->default()] }}">
+            @endisset
+        @endif
         @if ($robots !== '')
             <meta name="robots" content="{{ $robots }}">
         @endif
@@ -23,6 +32,7 @@
         <meta property="og:title" content="{{ $pageTitle !== '' ? $pageTitle : $siteName }}">
         <meta property="og:description" content="{{ \Illuminate\Support\Str::limit(strip_tags($description), 300) }}">
         <meta property="og:url" content="{{ url()->current() }}">
+        <meta property="og:locale" content="{{ str_replace('-', '_', app()->getLocale()) }}">
         @hasSection('og_image')
             <meta property="og:image" content="@yield('og_image')">
             <meta name="twitter:card" content="summary_large_image">
@@ -43,7 +53,7 @@
     <body class="flex min-h-screen flex-col bg-paper font-sans text-ink antialiased">
         @hook('body.start')
         <a href="#content" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-surface focus:px-4 focus:py-2">
-            Skip to content
+            {{ __('Skip to content') }}
         </a>
 
         @include('press.partials.header', ['siteName' => $siteName, 'tagline' => $tagline])
