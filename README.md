@@ -28,11 +28,10 @@ More in [docs/demo](docs/demo) (admin dashboard, Translate dialog, menus and set
 
 ## Install
 
-From the latest release ([GitHub releases](https://github.com/pnscripts/pn-press/releases)):
+From the latest release ([Packagist](https://packagist.org/packages/pnscripts/pn-press), [GitHub releases](https://github.com/pnscripts/pn-press/releases)):
 
 ```bash
-composer create-project pnscripts/pn-press my-site \
-    --repository='{"type":"vcs","url":"https://github.com/pnscripts/pn-press"}'
+composer create-project pnscripts/pn-press my-site
 cd my-site
 php artisan db:seed     # optional: demo content in English and Bulgarian + the admin account below
 npm install
@@ -42,7 +41,7 @@ php artisan serve
 
 Without the demo seed there is no account yet: create yours with `php artisan press:admin you@example.com` (it asks for a password).
 
-`create-project` installs the newest tagged release, copies `.env.example` to `.env`, generates the app key, creates `database/database.sqlite` and runs the migrations. (Once the package is on Packagist the `--repository` line is not needed.)
+`create-project` installs the newest tagged release, copies `.env.example` to `.env`, generates the app key, creates `database/database.sqlite` and runs the migrations.
 
 Or with git:
 
