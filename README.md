@@ -40,6 +40,8 @@ npm run build
 php artisan serve
 ```
 
+Without the demo seed there is no account yet: create yours with `php artisan press:admin you@example.com` (it asks for a password).
+
 `create-project` installs the newest tagged release, copies `.env.example` to `.env`, generates the app key, creates `database/database.sqlite` and runs the migrations. (Once the package is on Packagist the `--repository` line is not needed.)
 
 Or with git:
@@ -68,7 +70,7 @@ Visit [http://127.0.0.1:8000](http://127.0.0.1:8000) for the demo site, and [/bg
 - Email: `admin@example.com`
 - Password: `password`
 
-Change these credentials before any real deployment.
+These exist only after `php artisan db:seed` (or `migrate --seed`). Change them before any real deployment, or create your own account with `php artisan press:admin you@example.com`.
 
 Filament login stays at `/admin`. Only users with the `admin` or `editor` role can open the panel.
 

@@ -19,6 +19,7 @@ use App\Press\Settings;
 use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Schema;
 use Livewire\Livewire;
 use PnPress\ContactForm\Http\SendMessageController;
 use PnPress\SeoSitemap\Http\SitemapController;
@@ -291,5 +292,21 @@ class MultilingualTest extends TestCase
         $this->aboutPages();
 
         $this->get('/about')->assertOk()->assertDontSee('hreflang', false)->assertDontSee('press-languages', false);
+    }
+
+    public function test_rolling_back_the_language_migration_is_refused_while_translations_exist(): void
+    {
+        Page::factory()->create(['slug' => 'x', 'locale' => 'bg']);
+        $migration = require database_path('migrations/2026_10_18_100000_add_locales_to_content_tables.php');
+
+        try {
+            $migration->down();
+            $this->fail('Rollback was not refused.');
+        } catch (\RuntimeException $e) {
+            $this->assertStringContainsString('Delete it first', $e->getMessage());
+        }
+
+        // Nothing was changed.
+        $this->assertTrue(Schema::hasColumn('menus', 'locale'));
     }
 }

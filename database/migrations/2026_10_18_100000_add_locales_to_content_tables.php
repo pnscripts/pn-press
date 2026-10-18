@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 /**
@@ -47,6 +48,18 @@ return new class extends Migration
 
     public function down(): void
     {
+        // Rolling back would merge every language into one and break the unique slugs/paths/menu locations.
+        // Refuse before changing anything (MySQL cannot undo half a migration).
+        $default = $this->defaultLocale();
+        $other = DB::table('menus')->whereNotNull('locale')->exists();
+        foreach (['pages', 'posts', 'categories'] as $table) {
+            $other = $other || DB::table($table)->where('locale', '!=', $default)->exists();
+        }
+
+        if ($other) {
+            throw new RuntimeException('Content in languages other than "'.$default.'" exists (pages, posts, categories or menus). Delete it first, then roll back.');
+        }
+
         Schema::table('menus', function (Blueprint $table) {
             $table->dropIndex(['location', 'locale']);
             $table->dropColumn('locale');
