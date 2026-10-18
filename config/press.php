@@ -10,7 +10,7 @@ return [
     | package passes the checks in App\Press\Packages\ZipValidator.
     */
 
-    'version' => '1.1.0',
+    'version' => '1.1.1',
 
     /*
     | Languages (App\Press\I18n\Locales). One code = a single-language site (no prefixes, no switcher).

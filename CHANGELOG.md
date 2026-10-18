@@ -2,6 +2,19 @@
 
 All notable changes to PN Scripts Press. Dates are in YYYY-MM-DD.
 
+## 1.1.1 (2026-10-18)
+
+Found by the install test from the 1.1.0 release.
+
+### Added
+
+- `php artisan press:admin you@example.com [--role=editor]`: create your admin account (password asked, never shown) or give an existing user a role. Installs without the demo seed had no way to sign in.
+
+### Fixed
+
+- Rolling back the 1.1 language migration is refused, before anything changes, while pages, posts, categories or menus in other languages exist. On MySQL it used to fail half-way and leave the schema broken.
+- README: MySQL steps, when the demo admin exists, `press:admin`.
+
 ## 1.1.0 (2026-10-18)
 
 ### Added
