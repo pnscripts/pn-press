@@ -8,7 +8,7 @@ This repository also contains files published by third-party packages. They keep
 | Path | Component | Licence |
 |---|---|---|
 | `public/js/filament/`, `public/css/filament/` | Filament 5.x assets (published by `php artisan filament:assets`), © Filament contributors | MIT |
-| `public/fonts/filament/filament/inter/` | Inter typeface, © The Inter Project Authors (https://github.com/rsms/inter) | SIL Open Font License 1.1 (full text: https://openfontlicense.org/open-font-license-official-text/) |
+| `public/fonts/filament/filament/inter/` | Inter typeface, © The Inter Project Authors (https://github.com/rsms/inter) | SIL Open Font License 1.1 (licence text shipped next to the fonts in `public/fonts/filament/filament/inter/OFL.txt`; also available: https://openfontlicense.org/open-font-license-official-text/) |
 | `public/vendor/telescope/` | Laravel Telescope assets, © Taylor Otwell | MIT |
 
 The Filament JavaScript bundles include, among others: Chart.js (MIT), FilePond and its plugins (MIT), Sortable (MIT), Cropper.js (MIT), EasyMDE and CodeMirror (MIT), Tippy.js (MIT), Tiptap (MIT), Tom Select (Apache-2.0) and js-sha256 (MIT). Each bundle keeps the original licence headers.
