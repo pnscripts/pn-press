@@ -8,7 +8,7 @@ This repository also contains files published by third-party packages. They keep
 | Path | Component | Licence |
 |---|---|---|
 | `public/js/filament/`, `public/css/filament/` | Filament 5.x assets (published by `php artisan filament:assets`), © Filament contributors | MIT |
-| `public/fonts/filament/filament/inter/` | Inter typeface, © The Inter Project Authors | SIL Open Font License 1.1 |
+| `public/fonts/filament/filament/inter/` | Inter typeface, © The Inter Project Authors (https://github.com/rsms/inter) | SIL Open Font License 1.1 (full text: https://openfontlicense.org/open-font-license-official-text/) |
 | `public/vendor/telescope/` | Laravel Telescope assets, © Taylor Otwell | MIT |
 
 The Filament JavaScript bundles include, among others: Chart.js (MIT), FilePond and its plugins (MIT), Sortable (MIT), Cropper.js (MIT), EasyMDE and CodeMirror (MIT), Tippy.js (MIT), Tiptap (MIT), Tom Select (Apache-2.0) and js-sha256 (MIT). Each bundle keeps the original licence headers.
@@ -21,4 +21,6 @@ Composer and npm packages (Laravel, Filament, Tailwind CSS and others) are not c
 
 ## Network note
 
-`resources/views/press/partials/cdn-fallback.blade.php` loads Tailwind CSS from cdn.jsdelivr.net **only** when the front-end assets were never built (`npm run build`). A built site makes no third-party requests.
+The public theme layout (`resources/views/layouts/app.blade.php`) and the admin panel header (`app/Providers/Filament/AdminPanelProvider.php`) load the web fonts Fraunces (© The Fraunces Project Authors) and Inter (© The Inter Project Authors), both under the SIL Open Font License 1.1, from the privacy-focused font service `fonts.bunny.net`. The font files are not stored in this repository for these two uses. Sites that must not contact any third party should self-host these fonts or change the font stack in the theme.
+
+`resources/views/press/partials/cdn-fallback.blade.php` also loads Tailwind CSS from cdn.jsdelivr.net **only** when the front-end assets were never built (`npm run build`).
