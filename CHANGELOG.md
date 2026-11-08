@@ -6,6 +6,7 @@ All notable changes to PN Scripts Press. Dates are in YYYY-MM-DD.
 
 - Security: Symfony components and Livewire for the advisories of 2026-11-04; vite 6.4.5, follow-redirects 1.16.3 and source-map-js 1.2.2 in the build tools.
 - CI audits the Composer and npm packages, builds the assets, runs with a read-only token and pins its actions to commit hashes. `composer check` runs the same checks locally.
+- Laravel 13.40, Filament 5.11.1 (its published assets updated with it), Scramble 0.13.53, laravel-permission 8.4; Vite 8 with laravel-vite-plugin 3 and Tailwind 4.3, concurrently 10, axios 1.21.
 - Dependabot proposes minor and patch updates once a week in one pull request per ecosystem, and security updates as soon as they are published.
 
 ## 1.1.1 (2026-10-18)
