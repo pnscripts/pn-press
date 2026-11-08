@@ -83,6 +83,13 @@
         ],
         "analyse": [
             "@php -d memory_limit=1G vendor/bin/phpstan analyse --no-progress"
+        ],
+        "check": [
+            "@composer audit",
+            "npm audit --audit-level=moderate",
+            "npm run build",
+            "@test",
+            "@analyse"
         ]
     },
     "extra": {
@@ -102,5 +109,8 @@
         }
     },
     "minimum-stability": "stable",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "scripts-descriptions": {
+        "check": "Everything the Tests workflow checks, in the same order: run it before every push."
+    }
 }

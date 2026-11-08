@@ -5,22 +5,53 @@ on:
     branches: [main]
   pull_request:
 
+# Read, and nothing else: a dependency that runs during the build gets the
+# token of this workflow, so it gets no write access with it.
+permissions:
+  contents: read
+
+# A newer push to the same branch or pull request replaces a run still in progress.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   tests:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      # Actions are pinned to commit hashes, so a moved tag cannot change what runs here.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
         with:
           php-version: '8.4'
           extensions: mbstring, sqlite, pdo_sqlite, zip, fileinfo
           coverage: none
 
+      - name: Setup Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+          cache: npm
+
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Composer audit
+        run: composer audit
+
+      # Every npm package here is a build tool; they run on developers'
+      # machines and in this workflow, so all of them are audited.
+      - name: npm audit
+        run: npm audit --audit-level=moderate
+
+      - name: Build the assets
+        run: npm run build
 
       - name: Prepare environment
         run: cp .env.example .env
